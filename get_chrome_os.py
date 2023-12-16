@@ -17,8 +17,7 @@ try:
             universal_newlines=True
         ).strip()
     else:
-        print("Unsupported OS. Please enter your Chrome browser version manually.")
-        chrome_version = input("Enter your Chrome browser version (e.g., 72.0.3626.81): ")
+        raise ChromeVersionError("Unsupported OS")
 except Exception as e:
     print(f"Error retrieving Chrome version: {e}")
     exit(1)

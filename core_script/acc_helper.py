@@ -1,18 +1,14 @@
 from alpaca.trading.client import TradingClient
 from decouple import config
 
-api_key = config('PAPER_API_KEY_ID')
-secret_key = config('PAPER_API_SECRET_KEY')
-
-
 class AlpacaAccount:
-    def __init__(self):
+    def __init__(self, api_key: str, secret_key: str):
         self.client = TradingClient(api_key, secret_key)
         self.account = self.client.get_account()
 
-    ## standard obj getters
-    ## no setters to avoid acc info corruption
-    ## there is no reason to modify acc info
+    # standard obj getters
+    # no setters to avoid acc info corruption
+    # there is no reason to modify acc info
 
     def get_account_blocked(self):
         return self.account.account_blocked
@@ -106,9 +102,9 @@ class AlpacaAccount:
 
     def get_transfers_blocked(self):
         return self.account.transfers_blocked
-    
-    ## custom helper functions
-    
+
+    # custom helper functions
+
     def get_SAFE_cash_balance(self):
         return self.account.non_marginable_buying_power
 
@@ -121,9 +117,9 @@ class AlpacaAccount:
             return False
         if not self.account.trade_suspended_by_user:
             print("Cannot trade due to account being suspeneded by user")
-            return False   
+            return False
         if not self.account.trading_blocked:
             print("Cannot trade due to trading being blocked on account")
-            return False 
+            return False
         print("Can trade today")
         return True

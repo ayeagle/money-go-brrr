@@ -1,13 +1,13 @@
-from typing import Union, List
+from typing import List
 import pandas as pd
 import json
 import datetime
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data import StockQuotesRequest
 from core_script.class_alpaca_account import AlpacaAccount
-from data_providers.class_data_provider_params import DataProviderParams
-from data_providers.class_data_provider_payload import DataProviderPayload
-from enums.data_type_enums import DataSourceFormat
+from data.class_data_provider_params import DataProviderParams
+from data.class_data_provider_payload import DataProviderPayload
+from consts.data_type_enums import DataSourceFormat
 from alpaca.data.timeframe import TimeFrame
 
 
@@ -57,9 +57,19 @@ def data_provider(
         period_end=params.period_end,
         format=params.data_format
     )
+    diff_data_sources = {
+        'stock_data': stock_data
+    }
 
-    print(stock_data)
+    combined_data_sources = diff_data_sources  # TODO actually set this up lol
+
+    final_data_payload = DataProviderPayload(
+        params=params,
+        diff_data_sources=diff_data_sources,
+        combined_data_sources=combined_data_sources
+    )
+
     # if(params.get_acc_trade_data):
     # get data
 
-    return
+    return final_data_payload

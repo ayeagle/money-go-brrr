@@ -1,5 +1,5 @@
 import datetime
-from enums.data_type_enums import DataSourceFormat
+from consts.data_type_enums import DataSourceFormat
 from typing import Union, List
 
 

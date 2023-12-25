@@ -1,11 +1,11 @@
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from decouple import config
-from data_providers.data_provider import data_provider
-from data_providers.class_data_provider_params import DataProviderParams
+from data.data_provider import data_provider
+from data.class_data_provider_params import DataProviderParams
 from core_script.script_helpers import handle_cli_args, is_trading_day
 
-from enums.data_type_enums import DataSourceFormat
+from consts.data_type_enums import DataSourceFormat
 
 
 api_key = config('PAPER_API_KEY_ID')
@@ -28,11 +28,12 @@ async def main() -> int:
         if not acc.can_trade():
             return 1
 
-    data_req = DataProviderParams()
+    data_params = DataProviderParams()
 
-    prices = data_provider(acc, data_req)
+    all_data = data_provider(acc, data_params)
 
-    print(prices)
+
+    print(all_data)
 
     # Creating request object
 

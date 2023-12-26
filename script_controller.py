@@ -1,41 +1,39 @@
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from decouple import config
-from data.data_provider import data_provider
+from data.data_provider import gen_data
 from data.class_data_provider_params import DataProviderParams
 from core_script.script_helpers import handle_cli_args, is_trading_day
 
 from consts.data_type_enums import DataSourceFormat
 
 
-api_key = config('PAPER_API_KEY_ID')
-secret_key = config('PAPER_API_SECRET_KEY')
-
-
 async def main() -> int:
+    # TODO add richer test params
     test_param = handle_cli_args()
-
-    print("this is the test param")
-    print(test_param)
 
     if (test_param != "force test"):
         if not is_trading_day():
             return 1
 
-    acc = AlpacaAccount(api_key, secret_key)
+    acc = AlpacaAccount(api_key, secret_key, paper_trading)
 
     if (test_param != "force test"):
         if not acc.can_trade():
             return 1
 
+    # need to define more specific params
     data_params = DataProviderParams()
 
-    all_data = data_provider(acc, data_params)
+    all_data = await gen_data(acc, data_params)
 
+    # print(all_data)
+    # print('STOCK DATA')
+    # print(all_data.diff_data_sources['stock_data'])
+    # # print('orders DATA')
+    # # print(all_data.diff_data_sources['orders_data'])
 
-    print(all_data)
-
-    # Creating request object
+    # # Creating request object
 
     # init get data for model
 
@@ -54,4 +52,7 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
+    api_key = config('PAPER_API_KEY_ID')
+    secret_key = config('PAPER_API_SECRET_KEY')
+    paper_trading = True
     asyncio.run(main())

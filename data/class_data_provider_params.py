@@ -6,7 +6,7 @@ from typing import Union, List
 class DataProviderParams:
     def __init__(
             self,
-            stock_tickers: List[str] = ["spy"],
+            stock_tickers: List[str] = ["spy","meta","goog"],
             get_acc_trade_data: bool = False,
             get_weather_data: bool = False,
             period_start: datetime = None,
@@ -17,7 +17,7 @@ class DataProviderParams:
         self._get_acc_trade_data = get_acc_trade_data
         self._get_weather_data = get_weather_data
         self._period_start = period_start or datetime.date.today() - datetime.timedelta(days=1)
-        self._period_end = period_end or self.period_start - datetime.timedelta(days=365 * 2)
+        self._period_end = period_end or self.period_start - datetime.timedelta(days=1 * 2)
         self._data_format = data_format
         
     @property

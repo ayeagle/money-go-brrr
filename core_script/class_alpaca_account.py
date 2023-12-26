@@ -2,10 +2,11 @@ from alpaca.trading.client import TradingClient
 
 
 class AlpacaAccount:
-    def __init__(self, api_key: str, secret_key: str):
+    def __init__(self, api_key: str, secret_key: str, paper_trading: bool):
         self.client = TradingClient(api_key, secret_key)
         self._account = self.client.get_account()
         self.keys = (api_key, secret_key)
+        self._paper_trading = paper_trading
 
     # standard obj getters
     # no setters to avoid acc info corruption
@@ -135,6 +136,10 @@ class AlpacaAccount:
         return self._account.transfers_blocked
 
     # custom helper functions
+
+    @property
+    def paper_trading(self):
+        return self._paper_trading
 
     def get_api_keys(self):
         return self.keys

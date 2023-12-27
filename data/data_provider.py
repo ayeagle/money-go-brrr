@@ -34,9 +34,7 @@ async def gen_stock_prices(
 
     hist_data = hist_data_client.get_stock_quotes(params_payload).df
 
-    formatted_data = None
-
-    return formatted_data
+    return hist_data
 
 
 async def gen_orders_data(
@@ -58,6 +56,9 @@ async def gen_orders_data(
     )
 
     filled_orders = order_data_client.get_orders(filter=params_payload)
+
+    print(filled_orders)
+    print(type(filled_orders))
 
     formatted_data = None
 

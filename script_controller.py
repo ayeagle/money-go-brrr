@@ -6,6 +6,22 @@ from data.data_classes import DataProviderParams
 from core_script.script_helpers import handle_cli_args, is_trading_day
 
 
+"""
+If running for the first time, you will need to set up
+env variables for alpaca api access. For paper trading
+and testing it should look like:
+
+    PAPER_API_ENDPOINT='paper-api.alpaca.markets'
+    PAPER_API_KEY_ID='kjhasdkjahsdjkashdjkasdh'
+    PAPER_API_SECRET_KEY='kkjhadsjkhasdkjhasdkjashd'
+
+Run main script with:
+    $ python3 script_controller.py
+
+Will default run in "force test" mode to skip certain
+Account checks that fail when paper trading
+"""
+
 async def main() -> int:
     # TODO add richer test params
     test_param = handle_cli_args()
@@ -24,12 +40,6 @@ async def main() -> int:
     data_params = DataProviderParams()
 
     all_data = await gen_data(acc, data_params)
-
-    # print(all_data)
-    # print('STOCK DATA')
-    # print(all_data.diff_data_sources['stock_data'])
-    # # print('orders DATA')
-    # # print(all_data.diff_data_sources['orders_data'])
 
     # # Creating request object
 

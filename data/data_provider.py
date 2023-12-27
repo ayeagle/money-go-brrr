@@ -133,6 +133,7 @@ async def gen_weather_data(
         "longitude": longitude,
         "start_date": period_start,
         "end_date": period_end,
+        "timezone": 'EST',
         'temperature_unit': 'fahrenheit',
         "daily": [
             "temperature_2m_max",
@@ -149,7 +150,7 @@ async def gen_weather_data(
         start=pd.to_datetime(response.Daily().Time(), unit="s"),
         end=pd.to_datetime(response.Daily().TimeEnd(), unit="s"),
         freq=pd.Timedelta(seconds=response.Daily().Interval()),
-        inclusive="left"
+        inclusive="right"
     ).strftime('%Y-%m-%d').tolist()
 
     temp_max = response.Daily().Variables(0).ValuesAsNumpy().tolist()

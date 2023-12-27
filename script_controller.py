@@ -5,8 +5,6 @@ from data.data_provider import gen_data
 from data.class_data_provider_params import DataProviderParams
 from core_script.script_helpers import handle_cli_args, is_trading_day
 
-from consts.data_type_enums import DataSourceFormat
-
 
 async def main() -> int:
     # TODO add richer test params

@@ -7,12 +7,10 @@ from alpaca.data import StockQuotesRequest
 from core_script.class_alpaca_account import AlpacaAccount
 from data.class_data_provider_params import DataProviderParams
 from data.class_data_provider_payload import DataProviderPayload
-from consts.data_type_enums import DataSourceFormat
 from alpaca.data.timeframe import TimeFrame
 from alpaca.trading.requests import GetOrdersRequest
 from alpaca.trading.enums import QueryOrderStatus
 from alpaca.trading.client import TradingClient
-import asyncio
 
 
 async def gen_stock_prices(
@@ -20,7 +18,6 @@ async def gen_stock_prices(
     target_symbols: List[str],
     period_start: datetime,
     period_end: datetime,
-    format: DataSourceFormat = DataSourceFormat.PYDICT
 ):
 
     hist_data_client = StockHistoricalDataClient(*acc.get_api_keys())
@@ -39,14 +36,6 @@ async def gen_stock_prices(
 
     formatted_data = None
 
-    if (format == DataSourceFormat.PYDICT):
-        formatted_data = hist_data
-    elif (format == DataSourceFormat.JSON):
-        formatted_data = json.dumps(hist_data)
-    elif (format == DataSourceFormat.DATAFRAME):
-        # TODO handle multiple symbols formatting
-        formatted_data = pd.DataFrame(hist_data[target_symbols])
-
     return formatted_data
 
 
@@ -56,7 +45,6 @@ async def gen_orders_data(
     period_start: datetime,
     period_end: datetime,
     paper_trading: bool = True,
-    format: DataSourceFormat = DataSourceFormat.PYDICT
 ):
 
     order_data_client = TradingClient(*acc.get_api_keys(), paper=paper_trading)
@@ -73,14 +61,6 @@ async def gen_orders_data(
 
     formatted_data = None
 
-    if (format == DataSourceFormat.PYDICT):
-        formatted_data = filled_orders
-    elif (format == DataSourceFormat.JSON):
-        formatted_data = json.dumps(filled_orders)
-    elif (format == DataSourceFormat.DATAFRAME):
-        # TODO handle multiple symbols formatting
-        formatted_data = pd.DataFrame(filled_orders[target_symbols])
-
     return formatted_data
 
 
@@ -93,15 +73,13 @@ async def gen_data(
         acc=acc,
         target_symbols=params.stock_tickers,
         period_start=params.period_start,
-        period_end=params.period_end,
-        format=params.data_format)
+        period_end=params.period_end)
     orders_data = await gen_orders_data(
         acc=acc,
         target_symbols=params.stock_tickers,
         period_start=params.period_start,
         period_end=params.period_end,
-        paper_trading=acc.paper_trading,
-        format=params.data_format)
+        paper_trading=acc.paper_trading)
 
     diff_data_sources = {
         'stock_data': stock_data,

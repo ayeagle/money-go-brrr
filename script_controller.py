@@ -2,7 +2,7 @@ from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from decouple import config
 from data.data_provider import gen_data
-from data.class_data_provider_params import DataProviderParams
+from data.data_classes import DataProviderParams
 from core_script.script_helpers import handle_cli_args, is_trading_day
 
 

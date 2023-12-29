@@ -50,7 +50,7 @@ async def gen_stock_prices(
         symbol_or_symbols=target_symbols,
         start=period_start,
         end=period_end, ## TODO something weird going on w/ this param
-        limit=100,
+        limit=100000,
         # timeframe=TimeFrame.Day,
         feed='sip',
         sort='asc',

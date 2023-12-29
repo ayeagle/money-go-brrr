@@ -1,6 +1,5 @@
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
-from decouple import config
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
 from core_script.script_helpers import convert_cli_args, is_trading_day
@@ -27,15 +26,17 @@ Account checks that fail when paper trading
 
 async def main() -> int:
     # TODO add richer test params
-    test_param = convert_cli_args()
+    run_type_param = convert_cli_args()
 
 
-    print(test_param)
-    if (test_param != "test"):
+    print(run_type_param)
+    if (run_type_param != "test"):
         if not is_trading_day():
             return 1
 
-    acc = AlpacaAccount(api_key, secret_key, paper_trading)
+    # return 1
+    acc = AlpacaAccount(run_type_param)
+
 
     # if (test_param != "test"):
     #     if not acc.can_trade():
@@ -65,7 +66,4 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    api_key = config('PAPER_API_KEY_ID')
-    secret_key = config('PAPER_API_SECRET_KEY')
-    paper_trading = True ## TODO need to move these to a better scope determined by CLI args
     asyncio.run(main())

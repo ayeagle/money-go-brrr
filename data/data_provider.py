@@ -49,7 +49,7 @@ async def gen_stock_prices(
     params_payload = StockQuotesRequest(
         symbol_or_symbols=target_symbols,
         start=period_start,
-        # end=period_end, TODO something weird going on w/ this param
+        end=period_end, ## TODO something weird going on w/ this param
         limit=100,
         # timeframe=TimeFrame.Day,
         feed='sip',
@@ -65,14 +65,13 @@ async def gen_stock_prices(
         asset_df = pd.DataFrame(
             [{key: value for key, value in obj} for obj in hist_price_dataframe.data[asset]])
 
-        for col in asset_df.columns:
-            asset_df.rename(columns={col: '_' + col}, inplace=True)
+        formatted_df = format_raw_columns(asset_df)
 
-        asset_df = asset_df.assign(market_price=(
-            asset_df['_bid_price'] + asset_df['_ask_price']) / 2)
+        formatted_df = formatted_df.assign(market_price=(
+            formatted_df['_bid_price'] + formatted_df['_ask_price']) / 2)
 
-        all_assets_df = pd.concat([all_assets_df, asset_df], axis=1)
-        each_asset_df[asset] = asset_df
+        all_assets_df = pd.concat([all_assets_df, formatted_df], axis=1)
+        each_asset_df[asset] = formatted_df
 
     final_data = {
         'price_history_by_asset': each_asset_df,
@@ -87,8 +86,6 @@ Generates the Alpaca trading account closed/filled orders history
 
 Data is of the type OrderHistoryPayload and then converted to dataframe
 """
-
-
 async def gen_orders_data(
     acc: AlpacaAccount,
     target_symbols: List[str],
@@ -104,7 +101,7 @@ async def gen_orders_data(
         limit=500,  # 500 is max orders returned
         after=period_start,
         nested=True,
-        # until=period_end,  TODO something weird going on w/ this param
+        until=period_end, ## TODO something weird going on w/ this param
         symbols=target_symbols
     )
 
@@ -113,8 +110,10 @@ async def gen_orders_data(
 
     filled_orders_dataframe = pd.DataFrame(
         [{key: value for key, value in obj} for obj in filled_orders])
+    
+    formatted_df = format_raw_columns(filled_orders_dataframe)
 
-    return filled_orders_dataframe
+    return formatted_df
 
 
 async def gen_weather_data(
@@ -160,15 +159,15 @@ async def gen_weather_data(
 
 
     weather_df = pd.DataFrame({
-        "latitude": response.Latitude(),
-        "longitude": response.Longitude(),
-        'Date': dates,
-        'Max_Temp': temp_max,
-        'Min_Temp': temp_min,
-        'Feels_Max_Temp': feels_temp_max,
-        'Feels_Min_Temp': feels_temp_min
+        "_latitude": response.Latitude(),
+        "_longitude": response.Longitude(),
+        '_date': dates,
+        '_max_temp': temp_max,
+        '_min_temp': temp_min,
+        '_feels_max_temp': feels_temp_max,
+        '_feels_min_temp': feels_temp_min
     })
-    print(weather_df)
+
 
     # location_data = {
     #     "latitude": response.Latitude(),
@@ -196,14 +195,22 @@ async def gen_weather_data(
     return weather_df
 
 
+def format_raw_columns (
+        raw_data: pd.DataFrame
+) -> pd.DataFrame:
+    
+    for col in raw_data.columns:
+        raw_data.rename(columns={col: '_' + col}, inplace=True)
+
+    return raw_data
+
+
 """
 Generates all relevant data, with optional params on which data to get
 
 Data is returned as individual dataframes as well as a TODO combined dataframe
 indexed by time
 """
-
-
 async def gen_data(
     acc: AlpacaAccount,
     params: DataProviderParams

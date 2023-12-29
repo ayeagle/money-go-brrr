@@ -1,12 +1,26 @@
 from alpaca.trading.client import TradingClient
+from decouple import config
+from consts.consts import RunTypeParam
+
+paper_api_key = config('PAPER_API_KEY_ID')
+paper_secret_key = config('PAPER_API_SECRET_KEY')
+
+real_api_key = config('API_KEY_ID')
+real_secret_key = config('API_SECRET_KEY')
 
 
 class AlpacaAccount:
-    def __init__(self, api_key: str, secret_key: str, paper_trading: bool):
-        self.client = TradingClient(api_key, secret_key)
+    def __init__(self, run_type_param: RunTypeParam):
+        self.run_type_param = run_type_param
+        if (run_type_param == RunTypeParam.PROD or run_type_param == RunTypeParam.PROD_DANGEROUS):
+            self.keys = (real_api_key, real_secret_key)        
+            self._paper_trading = False
+        else:
+            self.keys = (paper_api_key, paper_secret_key)
+            self._paper_trading = True
+
+        self.client = TradingClient(*self.keys)
         self._account = self.client.get_account()
-        self.keys = (api_key, secret_key)
-        self._paper_trading = paper_trading
 
     # standard obj getters
     # no setters to avoid acc info corruption
@@ -54,7 +68,7 @@ class AlpacaAccount:
     @property
     def pending_transfer_out(self):
         return float(self._account.pending_transfer_out)
-    
+
     @property
     def daytrade_count(self):
         return int(self._account.daytrade_count)

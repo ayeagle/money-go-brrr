@@ -3,7 +3,7 @@ import asyncio
 from decouple import config
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
-from core_script.script_helpers import handle_cli_args, is_trading_day
+from core_script.script_helpers import convert_cli_args, is_trading_day
 
 
 """
@@ -22,19 +22,24 @@ Will default run in "force test" mode to skip certain
 Account checks that fail when paper trading
 """
 
+## TODO MOVE THE API KEYS STUFF TO BE DETERMINED BY THE
+## CLI ARGS!!!! DO IT!!!!
+
 async def main() -> int:
     # TODO add richer test params
-    test_param = handle_cli_args()
+    test_param = convert_cli_args()
 
-    if (test_param != "force test"):
+
+    print(test_param)
+    if (test_param != "test"):
         if not is_trading_day():
             return 1
 
     acc = AlpacaAccount(api_key, secret_key, paper_trading)
 
-    if (test_param != "force test"):
-        if not acc.can_trade():
-            return 1
+    # if (test_param != "test"):
+    #     if not acc.can_trade():
+    #         return 1
 
     # need to define more specific params
     data_params = DataProviderParams()
@@ -62,5 +67,5 @@ async def main() -> int:
 if __name__ == "__main__":
     api_key = config('PAPER_API_KEY_ID')
     secret_key = config('PAPER_API_SECRET_KEY')
-    paper_trading = True
+    paper_trading = True ## TODO need to move these to a better scope determined by CLI args
     asyncio.run(main())

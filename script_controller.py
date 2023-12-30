@@ -1,8 +1,9 @@
+from consts.consts import RunTypeParam
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
-from core_script.script_helpers import convert_cli_args, is_trading_day
+from core_script.script_helpers import convert_cli_args, gen_download_files, is_trading_day
 
 
 """
@@ -30,9 +31,9 @@ async def main() -> int:
 
 
     print(run_type_param)
-    if (run_type_param != "test"):
-        if not is_trading_day():
-            return 1
+    # if (run_type_param != "test"):
+    #     if not is_trading_day():
+    #         return 1
 
     # return 1
     acc = AlpacaAccount(run_type_param)
@@ -46,6 +47,11 @@ async def main() -> int:
     data_params = DataProviderParams()
 
     all_data = await gen_data(acc, data_params)
+
+    if(acc.run_type_param == RunTypeParam.DOWNLOAD):
+        gen_download_files(acc, all_data)
+
+
 
     # # Creating request object
 

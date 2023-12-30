@@ -1,6 +1,9 @@
+from numpy import void
+import pandas as pd
 import pandas_market_calendars as mcal
 import sys
 import datetime
+from core_script.class_alpaca_account import AlpacaAccount
 from consts.consts import RunTypeParam
 from decouple import config
 
@@ -29,6 +32,22 @@ def convert_cli_args() -> list:
     run_param = handle_special_commands(primary_arg)
 
     return run_param
+
+
+def gen_download_files(acc: AlpacaAccount, data: any) -> void:
+
+    for key in data.keys():
+        val = data[key]
+        if isinstance(val, pd.DataFrame):
+            # If the value is a DataFrame, you can print something about it here
+            print(f"DataFrame at key '{key}':")
+            print(val.head())  # You can replace this with any action you want to perform on the DataFrame
+        elif isinstance(val, dict):
+            # If the value is another dictionary, recursively process it
+            gen_download_files(val)
+
+    df.to_csv('my_dataframe.csv', index=False)
+
 
     
 

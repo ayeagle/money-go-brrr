@@ -12,8 +12,8 @@ real_secret_key = config('API_SECRET_KEY')
 class AlpacaAccount:
     def __init__(self, run_type_param: RunTypeParam):
         self.run_type_param = run_type_param
-        if (run_type_param == RunTypeParam.PROD or run_type_param == RunTypeParam.PROD_DANGEROUS):
-            self.keys = (real_api_key, real_secret_key)        
+        if (run_type_param in [RunTypeParam.PROD, RunTypeParam.PROD_DANGEROUS]):
+            self.keys = (real_api_key, real_secret_key)
             self._paper_trading = False
         else:
             self.keys = (paper_api_key, paper_secret_key)

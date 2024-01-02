@@ -50,7 +50,7 @@ async def gen_stock_prices(
         symbol_or_symbols=target_symbols,
         start=period_start,
         end=period_end, ## TODO something weird going on w/ this param
-        limit=100000,
+        limit=1000,
         # timeframe=TimeFrame.Day,
         feed='sip',
         sort='asc',
@@ -221,6 +221,7 @@ async def gen_data(
     print(nyc_long)
     print(params.period_start)
     print(params.period_end)
+    print(params.stock_tickers)
 
     stock_data = await gen_stock_prices(
         acc=acc,

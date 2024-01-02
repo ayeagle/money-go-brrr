@@ -4,6 +4,7 @@ import asyncio
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
 from core_script.script_helpers import convert_cli_args, gen_download_files, is_trading_day
+from datetime import datetime
 
 
 """
@@ -16,47 +17,43 @@ and testing it should look like:
     PAPER_API_SECRET_KEY='kkjhadsjkhasdkjhasdkjashd'
 
 Run main script with:
-    $ python3 script_controller.py
+    $ python3 script_controller.py {OPTIONAL_ARGS}
 
-Will default run in "force test" mode to skip certain
+For list of run options:
+    $ python3 script_controller.py help
+
+
+Will default run in "test" mode to skip certain
 Account checks that fail when paper trading
 """
-
-## TODO MOVE THE API KEYS STUFF TO BE DETERMINED BY THE
-## CLI ARGS!!!! DO IT!!!!
 
 async def main() -> int:
     # TODO add richer test params
     run_type_param = convert_cli_args()
 
-
-    print(run_type_param)
-    # if (run_type_param != "test"):
-    #     if not is_trading_day():
-    #         return 1
-
-    # return 1
     acc = AlpacaAccount(run_type_param)
 
+    if (run_type_param in [
+            RunTypeParam.FULL_TEST,
+            RunTypeParam.PROD,
+            RunTypeParam.PROD_DANGEROUS]):
+        if not is_trading_day():
+            return 1
+        if not acc.can_trade():
+            return 1
 
-    # if (test_param != "test"):
-    #     if not acc.can_trade():
-    #         return 1
+    # init get data for model
 
-    # need to define more specific params
+    # need to define more specific params passed maybe from CLI
     data_params = DataProviderParams()
 
     all_data = await gen_data(acc, data_params)
 
-    if(acc.run_type_param == RunTypeParam.DOWNLOAD):
-        gen_download_files(all_data)
+    if (acc.run_type_param == RunTypeParam.DOWNLOAD):
+        ts = (datetime.now().strftime('%y_%m_%d'),
+              datetime.now().strftime('%H:%M:%S'))
+        gen_download_files(all_data, ts)
         return 0
-
-
-
-    # # Creating request object
-
-    # init get data for model
 
     # run/create new model
 

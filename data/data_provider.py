@@ -247,7 +247,7 @@ async def gen_data(
     }
 
     print(diff_data_sources)
-    combined_data_sources = diff_data_sources  # TODO actually set this up lol
+    combined_data_sources = diff_data_sources['weather_data']  # TODO actually set this up lol
 
     final_data_payload = DataProviderPayload(
         params=params,

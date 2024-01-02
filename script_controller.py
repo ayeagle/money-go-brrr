@@ -49,7 +49,8 @@ async def main() -> int:
     all_data = await gen_data(acc, data_params)
 
     if(acc.run_type_param == RunTypeParam.DOWNLOAD):
-        gen_download_files(acc, all_data)
+        gen_download_files(all_data)
+        return 0
 
 
 

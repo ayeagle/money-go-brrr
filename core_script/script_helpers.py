@@ -2,12 +2,17 @@ from numpy import void
 import pandas as pd
 import pandas_market_calendars as mcal
 import sys
-import datetime
+from datetime import datetime
 from core_script.class_alpaca_account import AlpacaAccount
 from consts.consts import RunTypeParam
 from decouple import config
+from typing import Union, List, Optional
+
+
+from data.data_classes import DataProviderPayload
 
 ready_to_trade = config('READY_TO_TRADE') == 'True'
+
 
 def is_trading_day() -> bool:
     nyse = mcal.get_calendar('NYSE')
@@ -34,38 +39,49 @@ def convert_cli_args() -> list:
     return run_param
 
 
-def gen_download_files(acc: AlpacaAccount, data: any) -> void:
+def gen_download_files(data: Union[DataProviderPayload, dict]) -> void:
 
-    for key in data.keys():
-        val = data[key]
-        if isinstance(val, pd.DataFrame):
-            # If the value is a DataFrame, you can print something about it here
-            print(f"DataFrame at key '{key}':")
-            print(val.head())  # You can replace this with any action you want to perform on the DataFrame
-        elif isinstance(val, dict):
-            # If the value is another dictionary, recursively process it
-            gen_download_files(val)
+    current_dt = datetime.now()
+    ts = current_dt.strftime('%Y_%m_%d_%H:%M:%S')
 
-    df.to_csv('my_dataframe.csv', index=False)
+    if isinstance(data, DataProviderPayload):
+        exec_df_download(data.combined_data_sources,
+                         'combine_data_sources', ts)
+        gen_download_files(data.diff_data_sources)
+    else:
+        for key in data.keys():
+            val = data[key]
+            if isinstance(val, pd.DataFrame):
+                print(f"DataFrame at key '{key}':")
+                print(val.head())
+                exec_df_download(val, key, ts)
+            elif isinstance(val, dict):
+                gen_download_files(val)
 
 
-    
+def exec_df_download(
+        data: pd.DataFrame,
+        file_name: str,
+        timestamp: str
+) -> void:
+    data.to_csv(f'downloaded_data/{file_name}_{timestamp}.csv', index=False)
+
 
 def handle_special_commands(arg: str):
 
-    if(arg in commands):
+    if (arg in commands):
         command_data = commands.get(arg)
         print_run_mode_summary([arg])
-    else: 
+    else:
         command_data = commands.get('no_arg_found')
         print_run_mode_summary(['no_arg_found'])
 
-    if(command_data['run_type_param'] == RunTypeParam.PROD_DANGEROUS and not ready_to_trade):
+    if (command_data['run_type_param'] == RunTypeParam.PROD_DANGEROUS and not ready_to_trade):
         print(not_ready_warning_message)
         print_run_mode_summary(commands.keys())
         print(not_ready_warning_message)
         sys.exit()
-    elif(command_data['run_type_param']  == RunTypeParam.TEST and arg == 'help'):
+    elif (command_data['run_type_param'] == RunTypeParam.TEST and arg == 'help'):
         print_run_mode_summary(commands.keys())
         sys.exit()
 
@@ -73,22 +89,24 @@ def handle_special_commands(arg: str):
 
 
 def print_run_mode_summary(items: list):
-        
-        if(len(items) > 1):
-            print(help_message)
-            print('See more detail about run modes below...\n')
 
+    if (len(items) > 1):
+        print(help_message)
+        print('See more detail about run modes below...\n')
+
+    print("\n*******************************************************************\n")
+    for key in items:
+        if (key == 'help' or key == 'no_arg_found'):
+            continue
+        command_data = commands[key]
+        print('Run Mode:    \u001b[44;1m\033[92m' +
+              command_data['run_mode']+' \u001b[0m')
+        print('Script flag:     ' + "'" +
+              command_data['run_type_param'].value + "'")
+        print('Credentials:     ' + command_data['trade_credentials'])
+        print('Can Trade:       ' + command_data['can_trade'])
+        print('Description:     ' + command_data['run_mode_descr'])
         print("\n*******************************************************************\n")
-        for key in items:
-            if(key == 'help' or key == 'no_arg_found'): continue
-            command_data = commands[key]
-            print('Run Mode:    \u001b[44;1m\033[92m' + command_data['run_mode']+' \u001b[0m')
-            print('Script flag:     ' + "'"+command_data['run_type_param'].value +"'")
-            print('Credentials:     ' + command_data['trade_credentials'])
-            print('Can Trade:       ' + command_data['can_trade'])
-            print('Description:     ' + command_data['run_mode_descr'])
-            print("\n*******************************************************************\n")
-
 
 
 not_ready_warning_message = '''
@@ -122,48 +140,48 @@ commands = {
         'run_type_param': RunTypeParam.TEST,
         'trade_credentials': '\033[92mPaper Trading\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : 'Running without account checks'
+        'run_mode_descr': 'Running without account checks'
     },
     RunTypeParam.FULL_TEST.value: {
         'run_mode': 'Full Test',
         'run_type_param': RunTypeParam.FULL_TEST,
         'trade_credentials': '\033[92mPaper Trading\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : 'Full test run'
+        'run_mode_descr': 'Full test run'
     },
     RunTypeParam.PROD.value: {
         'run_mode': 'Prod',
         'run_type_param': RunTypeParam.PROD,
         'trade_credentials': '\033[91mReal Money Trading\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : 'Running in prod without trading'
+        'run_mode_descr': 'Running in prod without trading'
     },
     RunTypeParam.PROD_DANGEROUS.value: {
         'run_mode': 'Prod DANGEROUS',
         'run_type_param': RunTypeParam.PROD_DANGEROUS,
         'trade_credentials': '\033[91mReal Money Trading\033[0m',
         'can_trade': '\033[91mTrue\033[0m',
-        'run_mode_descr' : 'Running prod with trading'
+        'run_mode_descr': 'Running prod with trading'
     },
     RunTypeParam.DOWNLOAD.value: {
         'run_mode': 'Download',
         'run_type_param': RunTypeParam.DOWNLOAD,
         'trade_credentials': '\033[92mPaper Trading\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : 'Full test run to download data'
+        'run_mode_descr': 'Full test run to download data'
     },
     'help': {
         'run_mode': 'Help',
         'run_type_param': RunTypeParam.TEST,
         'trade_credentials': '\033[92mNone\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : help_message
+        'run_mode_descr': help_message
     },
     'no_arg_found': {
         'run_mode': 'Test',
         'run_type_param': RunTypeParam.TEST,
         'trade_credentials': '\033[92mPaper Trading\033[0m',
         'can_trade': '\033[92mFalse\033[0m',
-        'run_mode_descr' : 'No argument was found, running in test mode without account checks'
+        'run_mode_descr': 'No argument was found, running in test mode without account checks'
     }
 }

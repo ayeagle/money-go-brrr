@@ -44,7 +44,7 @@ class DataProviderPayload:
             self,
             params: DataProviderParams,
             diff_data_sources: dict,
-            combined_data_sources: Union[dict, pd.DataFrame, str]
+            combined_data_sources: pd.DataFrame
     ):
         self._params = params
         self._diff_data_sources = diff_data_sources

@@ -4,6 +4,7 @@ import asyncio
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
 from core_script.script_helpers import convert_cli_args, gen_download_files, is_trading_day
+from datetime import datetime
 
 
 """
@@ -49,7 +50,8 @@ async def main() -> int:
     all_data = await gen_data(acc, data_params)
 
     if(acc.run_type_param == RunTypeParam.DOWNLOAD):
-        gen_download_files(all_data)
+        ts = datetime.now().strftime('%Y_%m_%d_%H:%M:%S')
+        gen_download_files(all_data, ts)
         return 0
 
 

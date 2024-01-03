@@ -1,7 +1,9 @@
-from datetime import date, datetime, timedelta
-from typing import Union, List, Optional
-import pandas as pd
 import datetime as dt
+from datetime import date, datetime, timedelta
+from typing import List, Optional, Union
+
+import pandas as pd
+
 
 class DataProviderParams:
     def __init__(

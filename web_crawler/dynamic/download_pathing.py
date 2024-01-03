@@ -1,6 +1,7 @@
-import requests
-import zipfile
 import os
+import zipfile
+
+import requests
 
 # Latest release URL for ChromeDriver
 latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"

@@ -1,13 +1,15 @@
-from core_script.cli_formatters import green
+import asyncio
+from datetime import datetime
+
 from consts.consts import RunTypeParam, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
-import asyncio
-from data.data_provider import gen_data
+from core_script.cli_formatters import green
+from core_script.script_helpers import (convert_cli_args, gen_download_files,
+                                        gen_prompt_confirm_data_params,
+                                        is_trading_day)
 from data.data_classes import DataProviderParams
-from core_script.script_helpers import convert_cli_args, gen_download_files, gen_prompt_confirm_data_params, is_trading_day
-from datetime import datetime
+from data.data_provider import gen_data
 from trading_model.core_model import gen_run_core_model
-
 
 """
 **********************************************************

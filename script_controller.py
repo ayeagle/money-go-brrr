@@ -3,7 +3,7 @@ from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
-from core_script.script_helpers import convert_cli_args, gen_download_files, is_trading_day
+from core_script.script_helpers import convert_cli_args, gen_download_files, gen_prompt_confirm_data_params, is_trading_day
 from datetime import datetime
 
 
@@ -27,6 +27,7 @@ Will default run in "test" mode to skip certain
 Account checks that fail when paper trading
 """
 
+
 async def main() -> int:
     # TODO add richer test params
     run_type_param = convert_cli_args()
@@ -46,6 +47,9 @@ async def main() -> int:
 
     # need to define more specific params passed maybe from CLI
     data_params = DataProviderParams()
+
+    if (acc.run_type_param == RunTypeParam.DOWNLOAD):
+        data_params = gen_prompt_confirm_data_params(data_params)
 
     all_data = await gen_data(acc, data_params)
 

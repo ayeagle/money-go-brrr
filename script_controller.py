@@ -1,15 +1,15 @@
-from consts.consts import RunTypeParam
+from consts.consts import RunTypeParam, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
 from data.data_provider import gen_data
 from data.data_classes import DataProviderParams
 from core_script.script_helpers import convert_cli_args, gen_download_files, gen_prompt_confirm_data_params, is_trading_day
 from datetime import datetime
-
 from trading_model.core_model import gen_run_core_model
 
 
 """
+**********************************************************
 If running for the first time, you will need to set up
 env variables for alpaca api access. For paper trading
 and testing it should look like:
@@ -27,6 +27,7 @@ For list of run options:
 
 Will default run in "test" mode to skip certain
 Account checks that fail when paper trading
+**********************************************************
 """
 
 
@@ -48,10 +49,9 @@ async def main() -> int:
     # init get data for model
 
     # need to define more specific params passed maybe from CLI
-    data_params = DataProviderParams()
 
-    if (acc.run_type_param == RunTypeParam.DOWNLOAD):
-        data_params = gen_prompt_confirm_data_params(data_params)
+    data_params = gen_prompt_confirm_data_params(
+        acc, data_param_presets['default'])
 
     all_data = await gen_data(acc, data_params)
 
@@ -60,8 +60,8 @@ async def main() -> int:
               datetime.now().strftime('%H:%M:%S'))
         gen_download_files(all_data, ts)
         return 0
-    
-    decision = gen_run_core_model(data_params)
+
+    decision = await gen_run_core_model(data_params)
 
     # run/create new model
 

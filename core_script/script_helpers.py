@@ -7,9 +7,11 @@ from core_script.class_alpaca_account import AlpacaAccount
 from consts.consts import RunTypeParam
 from decouple import config
 from typing import Union
+import datetime as dt
 
 
-from data.data_classes import DataProviderPayload
+
+from data.data_classes import DataProviderParams, DataProviderPayload
 
 ready_to_trade = config('READY_TO_TRADE') == 'True'
 
@@ -34,6 +36,58 @@ def convert_cli_args() -> list:
         primary_arg = ''
     run_param = handle_special_commands(primary_arg)
     return run_param
+
+
+def gen_prompt_confirm_data_params(params: DataProviderParams) -> DataProviderParams:
+
+    params_dict = vars(params)
+    print('Default params currently...')
+    for key, value in params_dict.items():
+        key = key + ' :'
+        print(f"{key:25}{value}")
+
+    final_params = confirm_edit_params(params)
+
+    print("Running with following data params:")
+    params_dict = vars(final_params)
+    for key, value in params_dict.items():
+        key = key + ' :'
+        print(green(f"{key:25}{value}"))   
+
+    sys.exit()
+
+    return [1]
+
+
+def confirm_edit_params(params) -> bool:
+    input_str = input("\nDo you want to override with new params? (Y/N)")
+    ans = input_str.lower()
+
+    if (ans == 'n'):
+        return params
+    elif (ans == 'y'):
+        return gen_set_new_params(params)
+    else:
+        print(red('\nInvalid response, use Y or N'))
+        return confirm_edit_params(params)
+
+
+def gen_set_new_params(params):
+    print("\nAvailable data param presets")
+    for key in data_param_presets.keys():
+        params_dict = vars(data_param_presets[key])
+        print(f'\nData Param Preset: {green(key)}')
+        for key, value in params_dict.items():
+            key = key + ' :'
+            print(f"    {key:<25}{value}")
+
+    ans = input("\nPlease enter the key string for the preset you'd like to use:")
+
+    while(ans not in data_param_presets):
+        print("Key doesn't exist, try again...")
+        ans = input("Please enter the key string for the preset you'd like to use:")
+
+    return data_param_presets[ans]
 
 
 def gen_download_files(
@@ -137,6 +191,10 @@ Available script run modes:
 \033[0m
 '''
 
+new_param_prompt = green(
+    '''\nPlease specify new slash separated params e.g.
+['spy','aapl','nflx'] / true / false / / 2023-01-01
+Leaving a param blank will use default constructor value\n''')
 
 commands = {
     RunTypeParam.TEST.value: {
@@ -188,4 +246,29 @@ commands = {
         'can_trade': green('False'),
         'run_mode_descr': 'No argument was found, running in test mode without account checks'
     }
+}
+
+
+data_param_presets: dict[str, DataProviderParams] = {
+    'default': DataProviderParams(
+        stock_tickers=["spy", "meta", "goog"],
+        get_acc_trade_data=True,
+        get_weather_data=True,
+        period_start=dt.date.today() - dt.timedelta(days=1),
+        period_end=dt.date.today() - dt.timedelta(days=365)
+    ),
+    'spy_only': DataProviderParams(
+        stock_tickers=["spy"],
+        get_acc_trade_data=True,
+        get_weather_data=True,
+        period_start=dt.date.today() - dt.timedelta(days=1),
+        period_end=dt.date.today() - dt.timedelta(days=365)
+    ),
+    'spy_only_skip_extra': DataProviderParams(
+        stock_tickers=["spy"],
+        get_acc_trade_data=False,
+        get_weather_data=False,
+        period_start=dt.date.today() - dt.timedelta(days=1),
+        period_end=dt.date.today() - dt.timedelta(days=365)
+    )
 }

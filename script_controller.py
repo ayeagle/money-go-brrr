@@ -6,6 +6,8 @@ from data.data_classes import DataProviderParams
 from core_script.script_helpers import convert_cli_args, gen_download_files, gen_prompt_confirm_data_params, is_trading_day
 from datetime import datetime
 
+from trading_model.core_model import gen_run_core_model
+
 
 """
 If running for the first time, you will need to set up
@@ -58,6 +60,8 @@ async def main() -> int:
               datetime.now().strftime('%H:%M:%S'))
         gen_download_files(all_data, ts)
         return 0
+    
+    decision = gen_run_core_model(data_params)
 
     # run/create new model
 

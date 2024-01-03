@@ -3,17 +3,22 @@ import pandas as pd
 import pandas_market_calendars as mcal
 import sys
 from datetime import datetime
+from core_script.cli_formatters import red, green, yellow
 from core_script.class_alpaca_account import AlpacaAccount
-from consts.consts import RunTypeParam
+from consts.consts import RunTypeParam, data_param_presets, commands
 from decouple import config
 from typing import Union
-import datetime as dt
-from data.data_param_presets import data_param_presets
 
 
 from data.data_classes import DataProviderParams, DataProviderPayload
 
 ready_to_trade = config('READY_TO_TRADE') == 'True'
+
+'''
+**********************************************************
+General functions
+**********************************************************
+'''
 
 
 def is_trading_day() -> bool:
@@ -28,33 +33,35 @@ def is_trading_day() -> bool:
         return True
 
 
-def convert_cli_args() -> list:
-    args = sys.argv[1:]
-    if args and len(args) > 0:
-        primary_arg = args[0].lower()
-    else:
-        primary_arg = ''
-    run_param = handle_special_commands(primary_arg)
-    return run_param
+'''
+**********************************************************
+Data provider params CLI edit functions
+**********************************************************
+'''
 
 
-def gen_prompt_confirm_data_params(params: DataProviderParams) -> DataProviderParams:
+def gen_prompt_confirm_data_params(
+        acc: AlpacaAccount,
+        params: DataProviderParams) -> DataProviderParams:
 
-    params_dict = vars(params)
-    print('Default params currently...')
-    for key, value in params_dict.items():
-        key = key + ' :'
-        print(f"{key:25}{value}")
+    final_params = params
 
-    final_params = confirm_edit_params(params)
+    if (acc.run_type_param == RunTypeParam.DOWNLOAD):
+        print('Default params currently...')
+        print_params(params)
+        final_params = confirm_edit_params(params)
 
     print("Running with following data params:")
-    params_dict = vars(final_params)
-    for key, value in params_dict.items():
-        key = key + ' :'
-        print(green(f"{key:25}{value}"))
+    print_params(final_params)
 
     return final_params
+
+
+def print_params(params: DataProviderParams) -> void:
+    params_dict = vars(params)
+    for key, value in params_dict.items():
+        key = key + ' :'
+        print(f"{key:25}{green(value)}")
 
 
 def confirm_edit_params(params) -> bool:
@@ -64,13 +71,13 @@ def confirm_edit_params(params) -> bool:
     if (ans == 'n'):
         return params
     elif (ans == 'y'):
-        return gen_set_new_params(params)
+        return gen_set_new_params()
     else:
         print(red('\nInvalid response, use Y or N'))
         return confirm_edit_params(params)
 
 
-def gen_set_new_params(params):
+def gen_set_new_params() -> DataProviderParams:
     print("\nAvailable data param presets")
     for key in data_param_presets.keys():
         params_dict = vars(data_param_presets[key])
@@ -89,6 +96,13 @@ def gen_set_new_params(params):
             "\nEnter the key string for the preset you'd like to use:")
 
     return data_param_presets[ans]
+
+
+'''
+**********************************************************
+Data download functions
+**********************************************************
+'''
 
 
 def gen_download_files(
@@ -118,6 +132,23 @@ def exec_df_download(
         f'downloaded_data/{timestamp[0]}_{file_name}_{timestamp[1]}.csv', index=False)
 
 
+'''
+**********************************************************
+CLI runtime parameter parsing functions
+**********************************************************
+'''
+
+
+def convert_cli_args() -> list:
+    args = sys.argv[1:]
+    if args and len(args) > 0:
+        primary_arg = args[0].lower()
+    else:
+        primary_arg = ''
+    run_param = handle_special_commands(primary_arg)
+    return run_param
+
+
 def handle_special_commands(arg: str) -> RunTypeParam:
 
     if (arg in commands):
@@ -141,7 +172,7 @@ def handle_special_commands(arg: str) -> RunTypeParam:
 
 def print_run_mode_summary(items: list) -> void:
     if (len(items) > 1):
-        print(help_message)
+        print(commands.get('help')['run_mode_descr'])
         print('See more detail about run modes below...\n')
 
     print("\n*******************************************************************\n")
@@ -159,17 +190,11 @@ def print_run_mode_summary(items: list) -> void:
         print("\n*******************************************************************\n")
 
 
-def red(text: str) -> str:
-    return f'\033[91m{text}\033[0m'
-
-
-def green(text: str) -> str:
-    return f'\033[92m{text}\033[0m'
-
-
-def yellow(text: str) -> str:
-    return f'\x1b[33m{text}\033[0m'
-
+'''
+**********************************************************
+Text formatting fx and snippets
+**********************************************************
+'''
 
 not_ready_warning_message = red('''
 \n*******************************************************************
@@ -179,76 +204,7 @@ not_ready_warning_message = red('''
 *******************************************************************
 ''')
 
-help_message = f'''
-{green('COMMANDS')}
-
-Modify the scripts execution behavior by adding params
-after calling the script. No need to add flags, just the
-word will do.
-
-Available script run modes:
-... {green('test')} [default]   => runs script in paper trading, skipping certain account checks
-... {green('full_test')}        => runs script in paper trading, including account checks
-... {green('prod')}             => runs script with real trading account
-... {green('prod_dangerous')}   => runs script with real money and trading authorization
-... {green('download')}         => runs script with paper creds and initials a download of the data
-... {green('help')}             => shows help command
-\033[0m
-'''
-
 new_param_prompt = green(
     '''\nPlease specify new slash separated params e.g.
 ['spy','aapl','nflx'] / true / false / / 2023-01-01
 Leaving a param blank will use default constructor value\n''')
-
-commands = {
-    RunTypeParam.TEST.value: {
-        'run_mode': 'Test [Default]',
-        'run_type_param': RunTypeParam.TEST,
-        'trade_credentials': green('Paper Trading'),
-        'can_trade': green('False'),
-        'run_mode_descr': 'Running without account checks'
-    },
-    RunTypeParam.FULL_TEST.value: {
-        'run_mode': 'Full Test',
-        'run_type_param': RunTypeParam.FULL_TEST,
-        'trade_credentials': green('Paper Trading'),
-        'can_trade': green('False'),
-        'run_mode_descr': 'Full test run'
-    },
-    RunTypeParam.PROD.value: {
-        'run_mode': 'Prod',
-        'run_type_param': RunTypeParam.PROD,
-        'trade_credentials': red('Real Money Trading'),
-        'can_trade': green('False'),
-        'run_mode_descr': 'Running in prod without trading'
-    },
-    RunTypeParam.PROD_DANGEROUS.value: {
-        'run_mode': 'Prod DANGEROUS',
-        'run_type_param': RunTypeParam.PROD_DANGEROUS,
-        'trade_credentials': red('Real Money Trading'),
-        'can_trade': red('True'),
-        'run_mode_descr': 'Running prod with trading'
-    },
-    RunTypeParam.DOWNLOAD.value: {
-        'run_mode': 'Download',
-        'run_type_param': RunTypeParam.DOWNLOAD,
-        'trade_credentials': green('Paper Trading'),
-        'can_trade': green('False'),
-        'run_mode_descr': 'Full test run to download data'
-    },
-    'help': {
-        'run_mode': 'Help',
-        'run_type_param': RunTypeParam.TEST,
-        'trade_credentials': '\033[92mNone\033[0m',
-        'can_trade': green('False'),
-        'run_mode_descr': help_message
-    },
-    'no_arg_found': {
-        'run_mode': 'No args [Default to Test]',
-        'run_type_param': RunTypeParam.TEST,
-        'trade_credentials': green('Paper Trading'),
-        'can_trade': green('False'),
-        'run_mode_descr': 'No argument was found, running in test mode without account checks'
-    }
-}

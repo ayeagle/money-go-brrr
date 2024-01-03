@@ -6,7 +6,7 @@ import datetime as dt
 class DataProviderParams:
     def __init__(
             self,
-            stock_tickers: list[str] = ["spy","meta","goog"],
+            stock_tickers: list[str] = ["spy"],
             get_acc_trade_data: bool = True,
             get_weather_data: bool = True,
             period_start: datetime = None,

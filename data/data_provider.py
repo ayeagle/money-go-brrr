@@ -21,6 +21,7 @@ import requests_cache
 from retry_requests import retry
 
 """
+**********************************************************
 Generates the price history of an asset or list of assets
 
 Returns a dict with 2 entries:
@@ -34,6 +35,7 @@ from the api e.g.
     - market_price  is derived
 
 Nested data is of the type PriceHistoryPayload
+**********************************************************
 """
 
 
@@ -49,7 +51,7 @@ async def gen_stock_prices(
     params_payload = StockQuotesRequest(
         symbol_or_symbols=target_symbols,
         start=period_start,
-        end=period_end, ## TODO something weird going on w/ this param
+        end=period_end,  # TODO something weird going on w/ this param
         limit=1000,
         # timeframe=TimeFrame.Day,
         feed='sip',
@@ -82,10 +84,16 @@ async def gen_stock_prices(
 
 
 """
-Generates the Alpaca trading account closed/filled orders history
+**********************************************************
+Generates the Alpaca trading account closed/filled 
+orders history
 
-Data is of the type OrderHistoryPayload and then converted to dataframe
+Data is of the type OrderHistoryPayload and then 
+converted to dataframe
+**********************************************************
 """
+
+
 async def gen_orders_data(
     acc: AlpacaAccount,
     target_symbols: List[str],
@@ -101,7 +109,7 @@ async def gen_orders_data(
         limit=500,  # 500 is max orders returned
         after=period_start,
         nested=True,
-        until=period_end, ## TODO something weird going on w/ this param
+        until=period_end,  # TODO something weird going on w/ this param
         symbols=target_symbols
     )
 
@@ -110,7 +118,7 @@ async def gen_orders_data(
 
     filled_orders_dataframe = pd.DataFrame(
         [{key: value for key, value in obj} for obj in filled_orders])
-    
+
     formatted_df = format_raw_columns(filled_orders_dataframe)
 
     return formatted_df
@@ -157,7 +165,6 @@ async def gen_weather_data(
     feels_temp_max = response.Daily().Variables(2).ValuesAsNumpy().tolist()
     feels_temp_min = response.Daily().Variables(3).ValuesAsNumpy().tolist()
 
-
     weather_df = pd.DataFrame({
         "_latitude": response.Latitude(),
         "_longitude": response.Longitude(),
@@ -167,7 +174,6 @@ async def gen_weather_data(
         '_feels_max_temp': feels_temp_max,
         '_feels_min_temp': feels_temp_min
     })
-
 
     # location_data = {
     #     "latitude": response.Latitude(),
@@ -195,10 +201,10 @@ async def gen_weather_data(
     return weather_df
 
 
-def format_raw_columns (
+def format_raw_columns(
         raw_data: pd.DataFrame
 ) -> pd.DataFrame:
-    
+
     for col in raw_data.columns:
         raw_data.rename(columns={col: '_' + col}, inplace=True)
 
@@ -206,11 +212,16 @@ def format_raw_columns (
 
 
 """
-Generates all relevant data, with optional params on which data to get
+**********************************************************
+Generates all relevant data, with optional params 
+on which data to get
 
-Data is returned as individual dataframes as well as a TODO combined dataframe
-indexed by time
+Data is returned as individual dataframes as well 
+as a TODO combined dataframe indexed by time
+**********************************************************
 """
+
+
 async def gen_data(
     acc: AlpacaAccount,
     params: DataProviderParams
@@ -219,9 +230,7 @@ async def gen_data(
     nyc_lat, nyc_long = WeatherCoords.NY_WALL_STREET.value
     print(nyc_lat)
     print(nyc_long)
-    print(params.period_start)
-    print(params.period_end)
-    print(params.stock_tickers)
+    print(*vars(params))
 
     stock_data = await gen_stock_prices(
         acc=acc,
@@ -248,7 +257,8 @@ async def gen_data(
     }
 
     print(diff_data_sources)
-    combined_data_sources = diff_data_sources['weather_data']  # TODO actually set this up lol
+    # TODO actually set this up lol
+    combined_data_sources = diff_data_sources['weather_data']
 
     final_data_payload = DataProviderPayload(
         params=params,

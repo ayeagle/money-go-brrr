@@ -1,8 +1,9 @@
-from enum import Enum
 import datetime as dt
-from data.data_classes import DataProviderParams
-from core_script.cli_formatters import red, green, yellow
+from enum import Enum
+
 import consts.cli_messages as mess
+from core_script.cli_formatters import green, red, yellow
+from data.data_classes import DataProviderParams
 
 
 class WeatherCoords(Enum):

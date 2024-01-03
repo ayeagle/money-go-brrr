@@ -1,16 +1,17 @@
-from numpy import void
-import pandas as pd
-import pandas_market_calendars as mcal
 import sys
 from datetime import datetime
-from core_script.cli_formatters import blue_back, bold, emphasize, red, green, yellow
-from core_script.class_alpaca_account import AlpacaAccount
-from consts.consts import RunTypeParam, data_param_presets, commands
-from decouple import config
 from typing import Union
+
+import pandas as pd
+import pandas_market_calendars as mcal
+from decouple import config
+from numpy import void
+
 import consts.cli_messages as mess
-
-
+from consts.consts import RunTypeParam, commands, data_param_presets
+from core_script.class_alpaca_account import AlpacaAccount
+from core_script.cli_formatters import (blue_back, bold, emphasize, green, red,
+                                        yellow)
 from data.data_classes import DataProviderParams, DataProviderPayload
 
 ready_to_trade = config('READY_TO_TRADE') == 'True'

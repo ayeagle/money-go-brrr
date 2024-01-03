@@ -1,9 +1,12 @@
 import sys
+
 from alpaca.trading.client import TradingClient
 from decouple import config
-from core_script.cli_formatters import bold, red
-from consts.consts import RunTypeParam
+
 import consts.cli_messages as mess
+from consts.consts import RunTypeParam
+from core_script.cli_formatters import bold, red
+
 
 class AlpacaAccount:
     def __init__(self, run_type_param: RunTypeParam):

@@ -1,12 +1,9 @@
-from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import MarketOrderRequest
-from alpaca.trading.enums import OrderSide, TimeInForce
-from alpaca.trading.requests import GetOrdersRequest
-from alpaca.trading.enums import QueryOrderStatus
-from decouple import config
 import asyncio
 
-
+from alpaca.trading.client import TradingClient
+from alpaca.trading.enums import OrderSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.requests import GetOrdersRequest, MarketOrderRequest
+from decouple import config
 
 api_key = config('PAPER_API_KEY_ID')
 secret_key = config('PAPER_API_SECRET_KEY')

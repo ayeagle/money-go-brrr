@@ -1,5 +1,4 @@
-from core_script.cli_formatters import bold, red, green
-
+from core_script.cli_formatters import bold, green, red
 
 no_api_keys_message = bold(red('''
 *******************************************************************

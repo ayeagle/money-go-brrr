@@ -1,6 +1,7 @@
 import subprocess
-import requests
 import sys
+
+import requests
 
 # Step 1: Identify Your Chrome Browser Version
 try:

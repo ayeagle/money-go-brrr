@@ -8,7 +8,7 @@ from consts.consts import RunTypeParam
 from decouple import config
 from typing import Union
 import datetime as dt
-
+from data.data_param_presets import data_param_presets
 
 
 from data.data_classes import DataProviderParams, DataProviderPayload
@@ -52,11 +52,9 @@ def gen_prompt_confirm_data_params(params: DataProviderParams) -> DataProviderPa
     params_dict = vars(final_params)
     for key, value in params_dict.items():
         key = key + ' :'
-        print(green(f"{key:25}{value}"))   
+        print(green(f"{key:25}{value}"))
 
-    sys.exit()
-
-    return [1]
+    return final_params
 
 
 def confirm_edit_params(params) -> bool:
@@ -80,12 +78,15 @@ def gen_set_new_params(params):
         for key, value in params_dict.items():
             key = key + ' :'
             print(f"    {key:<25}{value}")
+    print(yellow("\nDon't see what you need? Add a new param preset in data/data_param_presets.py"))
 
-    ans = input("\nPlease enter the key string for the preset you'd like to use:")
+    ans = input(
+        "\nEnter the key string for the preset you'd like to use:")
 
-    while(ans not in data_param_presets):
-        print("Key doesn't exist, try again...")
-        ans = input("Please enter the key string for the preset you'd like to use:")
+    while (ans not in data_param_presets):
+        print(yellow("\nKey doesn't exist, try again..."))
+        ans = input(
+            "\nEnter the key string for the preset you'd like to use:")
 
     return data_param_presets[ans]
 
@@ -164,6 +165,10 @@ def red(text: str) -> str:
 
 def green(text: str) -> str:
     return f'\033[92m{text}\033[0m'
+
+
+def yellow(text: str) -> str:
+    return f'\x1b[33m{text}\033[0m'
 
 
 not_ready_warning_message = red('''
@@ -246,29 +251,4 @@ commands = {
         'can_trade': green('False'),
         'run_mode_descr': 'No argument was found, running in test mode without account checks'
     }
-}
-
-
-data_param_presets: dict[str, DataProviderParams] = {
-    'default': DataProviderParams(
-        stock_tickers=["spy", "meta", "goog"],
-        get_acc_trade_data=True,
-        get_weather_data=True,
-        period_start=dt.date.today() - dt.timedelta(days=1),
-        period_end=dt.date.today() - dt.timedelta(days=365)
-    ),
-    'spy_only': DataProviderParams(
-        stock_tickers=["spy"],
-        get_acc_trade_data=True,
-        get_weather_data=True,
-        period_start=dt.date.today() - dt.timedelta(days=1),
-        period_end=dt.date.today() - dt.timedelta(days=365)
-    ),
-    'spy_only_skip_extra': DataProviderParams(
-        stock_tickers=["spy"],
-        get_acc_trade_data=False,
-        get_weather_data=False,
-        period_start=dt.date.today() - dt.timedelta(days=1),
-        period_end=dt.date.today() - dt.timedelta(days=365)
-    )
 }

@@ -7,8 +7,8 @@ class DataProviderParams:
     def __init__(
             self,
             stock_tickers: list[str] = ["spy","meta","goog"],
-            get_acc_trade_data: bool = False,
-            get_weather_data: bool = False,
+            get_acc_trade_data: bool = True,
+            get_weather_data: bool = True,
             period_start: datetime = None,
             period_end: datetime = None,
     ):

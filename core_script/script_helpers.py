@@ -3,11 +3,12 @@ import pandas as pd
 import pandas_market_calendars as mcal
 import sys
 from datetime import datetime
-from core_script.cli_formatters import red, green, yellow
+from core_script.cli_formatters import blue_back, bold, emphasize, red, green, yellow
 from core_script.class_alpaca_account import AlpacaAccount
 from consts.consts import RunTypeParam, data_param_presets, commands
 from decouple import config
 from typing import Union
+import consts.cli_messages as mess
 
 
 from data.data_classes import DataProviderParams, DataProviderPayload
@@ -117,11 +118,14 @@ def gen_download_files(
         for key in data.keys():
             val = data[key]
             if isinstance(val, pd.DataFrame):
-                print(f"\nDataFrame at key '{key}':")
-                print(val.head())
+                preview_data(val, key)
                 exec_df_download(val, key, ts)
             elif isinstance(val, dict):
                 gen_download_files(val, ts)
+
+def preview_data(data: pd.DataFrame, key: str) -> void:
+    print(emphasize(f"\nDataFrame at key '{key}':"))
+    print(data.head())
 
 
 def exec_df_download(
@@ -159,9 +163,9 @@ def handle_special_commands(arg: str) -> RunTypeParam:
         print_run_mode_summary(['no_arg_found'])
 
     if (command_data['run_type_param'] == RunTypeParam.PROD_DANGEROUS and not ready_to_trade):
-        print(not_ready_warning_message)
+        print(mess.not_ready_warning_message)
         print_run_mode_summary(commands.keys())
-        print(not_ready_warning_message)
+        print(mess.not_ready_warning_message)
         sys.exit()
     elif (command_data['run_type_param'] == RunTypeParam.TEST and arg == 'help'):
         print_run_mode_summary(commands.keys())
@@ -175,36 +179,15 @@ def print_run_mode_summary(items: list) -> void:
         print(commands.get('help')['run_mode_descr'])
         print('See more detail about run modes below...\n')
 
-    print("\n*******************************************************************\n")
+    print(mess.hl)
     for key in items:
         if (key == 'help'):
             continue
         command_data = commands[key]
-        print('Run Mode:    \u001b[44;1m\033[92m' +
-              command_data['run_mode']+' \u001b[0m')
+        print('Run Mode:    ' + emphasize(command_data['run_mode']))
         print('Script flag:     ' + "'" +
               command_data['run_type_param'].value + "'")
         print('Credentials:     ' + command_data['trade_credentials'])
         print('Can Trade:       ' + command_data['can_trade'])
         print('Description:     ' + command_data['run_mode_descr'])
-        print("\n*******************************************************************\n")
-
-
-'''
-**********************************************************
-Text formatting fx and snippets
-**********************************************************
-'''
-
-not_ready_warning_message = red('''
-\n*******************************************************************
-***                          WARNING                            ***
-***              The script is NOT ready to trade               ***
-***        Please do not use 'prod_dangerous' param yet         ***
-*******************************************************************
-''')
-
-new_param_prompt = green(
-    '''\nPlease specify new slash separated params e.g.
-['spy','aapl','nflx'] / true / false / / 2023-01-01
-Leaving a param blank will use default constructor value\n''')
+        print(mess.hl)

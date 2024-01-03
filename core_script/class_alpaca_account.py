@@ -1,23 +1,24 @@
+import sys
 from alpaca.trading.client import TradingClient
 from decouple import config
+from core_script.cli_formatters import bold, red
 from consts.consts import RunTypeParam
-
-paper_api_key = config('PAPER_API_KEY_ID')
-paper_secret_key = config('PAPER_API_SECRET_KEY')
-
-real_api_key = config('API_KEY_ID')
-real_secret_key = config('API_SECRET_KEY')
-
+import consts.cli_messages as mess
 
 class AlpacaAccount:
     def __init__(self, run_type_param: RunTypeParam):
         self.run_type_param = run_type_param
-        if (run_type_param in [RunTypeParam.PROD, RunTypeParam.PROD_DANGEROUS]):
-            self.keys = (real_api_key, real_secret_key)
-            self._paper_trading = False
-        else:
-            self.keys = (paper_api_key, paper_secret_key)
-            self._paper_trading = True
+
+        try:
+            if (run_type_param in [RunTypeParam.PROD, RunTypeParam.PROD_DANGEROUS]):
+                self.keys = (config('API_KEY_ID'), config('API_SECRET_KEY'))
+                self._paper_trading = False
+            else:
+                self.keys = (config('PAPER_API_KEY_ID'), config('PAPER_API_SECRET_KEY'))
+                self._paper_trading = True
+        except:
+            print(mess.no_api_keys_message)
+            sys.exit(0)
 
         self.client = TradingClient(*self.keys)
         self._account = self.client.get_account()

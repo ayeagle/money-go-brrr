@@ -1,3 +1,4 @@
+from core_script.cli_formatters import green
 from consts.consts import RunTypeParam, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
 import asyncio
@@ -32,6 +33,7 @@ Account checks that fail when paper trading
 
 
 async def main() -> int:
+
     # TODO add richer test params
     run_type_param = convert_cli_args()
 
@@ -59,6 +61,7 @@ async def main() -> int:
         ts = (datetime.now().strftime('%y_%m_%d'),
               datetime.now().strftime('%H:%M:%S'))
         gen_download_files(all_data, ts)
+        print(green('Data successfully downloaded. You can access it in the downloaded_data folder.'))
         return 0
 
     decision = await gen_run_core_model(data_params)

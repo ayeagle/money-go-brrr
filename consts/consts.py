@@ -4,10 +4,12 @@ from enum import Enum
 import consts.cli_messages as mess
 from core_script.cli_formatters import green, red, yellow
 from data.data_classes import DataProviderParams
+from alpaca.data.timeframe import TimeFrame
 
 
 class WeatherCoords(Enum):
     NY_WALL_STREET = (40.70618619744728, -74.00914109658291)
+
 
 class RunTypeParam(Enum):
     TEST = 'test'
@@ -16,6 +18,12 @@ class RunTypeParam(Enum):
     PROD_DANGEROUS = 'prod_dangerous'
     DOWNLOAD = 'download'
 
+
+'''
+**********************************************************
+Run time modes, do not edit
+**********************************************************
+'''
 
 commands = {
     RunTypeParam.TEST.value: {
@@ -70,26 +78,65 @@ commands = {
 }
 
 
+'''
+**********************************************************
+Data param presets that can be used during test and
+prod runs. See data/data_classes ==> DataProviderParams
+for more info on these params.
+
+These are primarily for testing purposes and downloading,
+in actual prod executions only one param will be run.
+**********************************************************
+'''
+
+
 data_param_presets: dict[str, DataProviderParams] = {
     'default': DataProviderParams(
         stock_tickers=["SPY", "META", "GOOG"],
+        get_live_stock_data=True,
+        get_custom_period_stock_data=True,
+        custom_stock_data_period=TimeFrame.Day,
         get_acc_trade_data=True,
         get_weather_data=True,
         period_start=dt.date.today() - dt.timedelta(days=365),
         period_end=dt.date.today() - dt.timedelta(days=1),
+        show_data_previews=True,
+        show_data_info=True,
     ),
     'spy_only': DataProviderParams(
         stock_tickers=["SPY"],
+        get_live_stock_data=True,
+        get_custom_period_stock_data=True,
+        custom_stock_data_period=TimeFrame.Day,
         get_acc_trade_data=True,
         get_weather_data=True,
         period_start=dt.date.today() - dt.timedelta(days=365),
         period_end=dt.date.today() - dt.timedelta(days=1),
+        show_data_previews=True,
+        show_data_info=True,
     ),
     'spy_only_skip_extra': DataProviderParams(
         stock_tickers=["SPY"],
+        get_live_stock_data=True,
+        get_custom_period_stock_data=True,
+        custom_stock_data_period=TimeFrame.Day,
         get_acc_trade_data=False,
         get_weather_data=False,
         period_start=dt.date.today() - dt.timedelta(days=365),
-        period_end=dt.date.today() - dt.timedelta(days=1),    
-    )
+        period_end=dt.date.today() - dt.timedelta(days=1),
+        show_data_previews=True,
+        show_data_info=True,
+    ),
+    'no_data': DataProviderParams(
+        stock_tickers=["SPY"],
+        get_live_stock_data=False,
+        get_custom_period_stock_data=True,
+        custom_stock_data_period=TimeFrame.Week,
+        get_acc_trade_data=False,
+        get_weather_data=False,
+        period_start=dt.date.today() - dt.timedelta(days=365),
+        period_end=dt.date.today() - dt.timedelta(days=1),
+        show_data_previews=True,
+        show_data_info=True,
+    ),
 }

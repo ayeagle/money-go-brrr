@@ -63,7 +63,7 @@ async def main() -> int:
         ts = (datetime.now().strftime('%y_%m_%d'),
               datetime.now().strftime('%H:%M:%S'))
         gen_preview_files(
-            params=data_params,
+            data_params=data_params,
             data=all_data,
             should_download=True,
             ts=ts)

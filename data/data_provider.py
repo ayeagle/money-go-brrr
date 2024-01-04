@@ -27,11 +27,7 @@ from core_script.script_helpers import gen_preview_files
 
 """
 **********************************************************
-Generates the price history of an asset or list of assets
-
-Returns a dict with 2 entries:
-    - a dict w/ individual asset dataframes
-    - a df with all asset data unioned together
+Generates the price history of an asset 
 
 Fields with an underscore prefix are raw data 
 from the api e.g.
@@ -72,11 +68,20 @@ async def gen_recent_live_stock_prices(
     return formatted_df
 
 
+"""
+**********************************************************
+Generates the price history of an asset or list of assets
+with open and closing prices based on an interval of time
+**********************************************************
+"""
+
+
 async def gen_custom_period_stock_prices(
         acc: AlpacaAccount,
         target_symbol: str,
         period_start: datetime,
-        period_end: datetime) -> pd.DataFrame:
+        period_end: datetime,
+        period_interval: TimeFrame) -> pd.DataFrame:
 
     hist_data_client = StockHistoricalDataClient(*acc.get_api_keys())
 
@@ -85,7 +90,7 @@ async def gen_custom_period_stock_prices(
         start=period_start,
         end=period_end,  # TODO something weird going on w/ this param
         limit=5,
-        timeframe=TimeFrame.Day,
+        timeframe=period_interval,
         feed='sip',
         sort='asc',
     )
@@ -93,8 +98,6 @@ async def gen_custom_period_stock_prices(
     hist_price_dataframe = hist_data_client.get_stock_bars(params_payload)
 
     formatted_df = format_nested_stock_df(hist_price_dataframe, target_symbol)
-
-    # print(formatted_df)
 
     return formatted_df
 
@@ -258,53 +261,51 @@ async def gen_data(
 ) -> DataProviderPayload:
 
     nyc_lat, nyc_long = WeatherCoords.NY_WALL_STREET.value
-    print(nyc_lat)
-    print(nyc_long)
-    print(*vars(params))
 
-    recent_stock_feed_data = {}
-    custom_period_stock_data = {}
+    diff_data_sources = {}
+    diff_data_sources['recent_stock_feed_data'] = {}
+    diff_data_sources['custom_period_stock_data'] = {}
 
     for stonk in params.stock_tickers:
-        new_data = await gen_recent_live_stock_prices(
+        if (params.get_live_stock_data):
+            new_data = await gen_recent_live_stock_prices(
+                acc=acc,
+                target_symbol=stonk,
+                period_start=params.period_start,
+                period_end=params.period_end)
+            live_data_key = stonk + "_live"
+            diff_data_sources['recent_stock_feed_data'][live_data_key] = new_data
+        if (params.get_custom_period_stock_data):
+            new_custom_data = await gen_custom_period_stock_prices(
+                acc=acc,
+                target_symbol=stonk,
+                period_start=params.period_start,
+                period_end=params.period_end,
+                period_interval=params.custom_stock_data_period)
+            custom_data_key = stonk + "_custom"
+            diff_data_sources['custom_period_stock_data'][custom_data_key] = new_custom_data
+
+    if (params.get_acc_trade_data):
+        orders_data = await gen_orders_data(
             acc=acc,
-            target_symbol=stonk,
+            target_symbols=params.stock_tickers,
             period_start=params.period_start,
-            period_end=params.period_end)
-        live_data_key = stonk + "_live"
-        recent_stock_feed_data[live_data_key] = new_data
+            period_end=params.period_end,
+            paper_trading=acc.paper_trading)
+        diff_data_sources['orders_data'] = orders_data
 
-        new_custom_data = await gen_custom_period_stock_prices(
-            acc=acc,
-            target_symbol=stonk,
+    if (params.get_weather_data):
+        weather_data = await gen_weather_data(
+            latitude=nyc_lat,
+            longitude=nyc_long,
             period_start=params.period_start,
-            period_end=params.period_end)
-        custom_data_key = stonk + "_custom"
-        custom_period_stock_data[custom_data_key] = new_custom_data
-
-    orders_data = await gen_orders_data(
-        acc=acc,
-        target_symbols=params.stock_tickers,
-        period_start=params.period_start,
-        period_end=params.period_end,
-        paper_trading=acc.paper_trading)
-    weather_data = await gen_weather_data(
-        latitude=nyc_lat,
-        longitude=nyc_long,
-        period_start=params.period_start,
-        period_end=params.period_end
-    )
-
-    diff_data_sources = {
-        'recent_live_stock_price_data': recent_stock_feed_data,
-        'custom_period_stock_price_data': custom_period_stock_data,
-        'orders_data': orders_data,
-        'weather_data': weather_data
-    }
+            period_end=params.period_end
+        )
+        diff_data_sources['weather_data'] = weather_data
 
     # print(diff_data_sources)
     # TODO actually set this up lol
-    combined_data_sources = diff_data_sources['weather_data']
+    combined_data_sources = pd.DataFrame()
 
     final_data_payload = DataProviderPayload(
         params=params,
@@ -313,7 +314,7 @@ async def gen_data(
     )
 
     gen_preview_files(
-        params=params,
+        data_params=params,
         data=final_data_payload)
 
     return final_data_payload

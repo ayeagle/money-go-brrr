@@ -1,3 +1,4 @@
+import os
 import sys
 from datetime import datetime
 from typing import Union
@@ -168,8 +169,13 @@ def exec_df_download(
         data: pd.DataFrame,
         file_name: str,
         timestamp: tuple) -> void:
+
+    folder_path = f'downloaded_data/{timestamp[0]}'
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
     data.to_csv(
-        f'downloaded_data/{timestamp[0]}_{file_name}_{timestamp[1]}.csv', index=False)
+        f'downloaded_data/{timestamp[0]}/{file_name}_{timestamp[0]}_{timestamp[1]}.csv', index=False)
 
 
 '''

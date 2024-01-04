@@ -87,7 +87,7 @@ def gen_set_new_params() -> DataProviderParams:
         for key, value in params_dict.items():
             key = key + ' :'
             print(f"    {key:<25}{value}")
-    print(yellow("\nDon't see what you need? Add a new param preset in data/data_param_presets.py"))
+    print(yellow("\nDon't see what you need? Add a new param preset in consts/consts => data_param_presets"))
 
     ans = input(
         "\nEnter the key string for the preset you'd like to use:")
@@ -102,31 +102,40 @@ def gen_set_new_params() -> DataProviderParams:
 
 '''
 **********************************************************
-Data download functions
+Data preview and download functions
 **********************************************************
 '''
 
 
-def gen_download_files(
+def gen_preview_files(
         data: Union[DataProviderPayload, dict],
-        ts: tuple) -> void:
+        parent: str = 'DataProviderPayload',
+        should_download: bool = False,
+        ts: tuple = (0, 0)) -> void:
 
     if isinstance(data, DataProviderPayload):
-        exec_df_download(data.combined_data_sources,
-                         'combine_data_sources', ts)
-        gen_download_files(data.diff_data_sources, ts)
+        if (should_download):
+            exec_df_download(data.combined_data_sources,
+                             'combine_data_sources', ts)
+        gen_preview_files(data.diff_data_sources,
+                          'diff_data_sources', should_download, ts)
     else:
         for key in data.keys():
             val = data[key]
             if isinstance(val, pd.DataFrame):
-                preview_data(val, key)
-                exec_df_download(val, key, ts)
+                preview_data(val, parent, key)
+                if (should_download):
+                    exec_df_download(val, key, ts)
             elif isinstance(val, dict):
-                gen_download_files(val, ts)
+                gen_preview_files(val, key, should_download, ts)
 
-def preview_data(data: pd.DataFrame, key: str) -> void:
-    print(emphasize(f"\nDataFrame at key '{key}':"))
+
+def preview_data(data: pd.DataFrame, parent: str, key: str) -> void:
+    print(emphasize(f"\nFolder '{parent}' \nKey '{key}':"))
+    print(green("DataFrame preview"))
     print(data.head())
+    print(green("DataFrame info"))
+    data.info()
 
 
 def exec_df_download(

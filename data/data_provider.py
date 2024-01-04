@@ -48,7 +48,7 @@ async def gen_recent_live_stock_prices(
         symbol_or_symbols=target_symbol,
         start=period_start,
         end=period_end,  # TODO something weird going on w/ this param
-        limit=30,
+        limit=10000,
         # timeframe=TimeFrame.Day,
         feed='sip',
         sort='asc',
@@ -85,7 +85,7 @@ async def gen_custom_period_stock_prices(
         symbol_or_symbols=target_symbol,
         start=period_start,
         end=period_end,  # TODO something weird going on w/ this param
-        limit=5,
+        limit=1000,
         timeframe=period_interval,
         feed='sip',
         sort='asc',

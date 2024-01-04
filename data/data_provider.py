@@ -1,29 +1,25 @@
-import asyncio
 import datetime
-import json
-import sys
-from typing import List, Union
-from numpy import void
+from typing import List
 
 import openmeteo_requests
 import pandas as pd
 import requests_cache
-from alpaca.data import StockQuotesRequest, StockBarsRequest
+from alpaca.common.types import RawData
+from alpaca.data import StockBarsRequest, StockQuotesRequest
 from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.models import QuoteSet
 from alpaca.data.timeframe import TimeFrame
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import QueryOrderStatus
 from alpaca.trading.requests import GetOrdersRequest
-from alpaca.data.models import QuoteSet
-from alpaca.common.types import RawData
+from numpy import void
 from retry_requests import retry
-from core_script.cli_formatters import emphasize, green
 
 from consts.consts import WeatherCoords
 from core_script.class_alpaca_account import AlpacaAccount
+from core_script.script_helpers import gen_preview_files
 from data.data_classes import (DataProviderParams, DataProviderPayload,
                                OrderHistoryPayload)
-from core_script.script_helpers import gen_preview_files
 
 """
 **********************************************************

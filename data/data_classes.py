@@ -1,6 +1,7 @@
 import datetime as dt
 from datetime import date, datetime, timedelta
 from typing import List, Optional, Union
+from alpaca.data.timeframe import TimeFrame
 
 import pandas as pd
 
@@ -8,21 +9,44 @@ import pandas as pd
 class DataProviderParams:
     def __init__(
             self,
-            stock_tickers: list[str] = ["spy"],
+            stock_tickers: list[str] = ["SPY"],
+            get_live_stock_data: bool = True,
+            get_custom_period_stock_data: bool = True,
+            custom_stock_data_period: TimeFrame = TimeFrame.Day,
             get_acc_trade_data: bool = True,
             get_weather_data: bool = True,
-            period_start: datetime = None,
-            period_end: datetime = None,
+            period_start: datetime = dt.date.today() - dt.timedelta(days=1),
+            period_end: datetime = dt.date.today() - dt.timedelta(days=365),
+            show_data_previews=True,
+            show_data_info=True,
     ):
         self._stock_tickers = stock_tickers
+        self._get_live_stock_data = get_live_stock_data
+        self._get_custom_period_stock_data = get_custom_period_stock_data
+        self._custom_stock_data_period = custom_stock_data_period
+        self._custom_stock_data_period
         self._get_acc_trade_data = get_acc_trade_data
         self._get_weather_data = get_weather_data
-        self._period_end = period_end or dt.date.today() - dt.timedelta(days=1)
-        self._period_start = period_start or self._period_end - dt.timedelta(days=365)
-        
+        self._period_end = period_end
+        self._period_start = period_start
+        self._show_data_previews = show_data_previews
+        self._show_data_info = show_data_info
+
     @property
     def stock_tickers(self):
         return self._stock_tickers
+
+    @property
+    def get_live_stock_data(self):
+        return self._get_live_stock_data
+
+    @property
+    def get_custom_period_stock_data(self):
+        return self._get_custom_period_stock_data
+
+    @property
+    def custom_stock_data_period(self):
+        return self._custom_stock_data_period
 
     @property
     def get_acc_trade_data(self):
@@ -40,6 +64,14 @@ class DataProviderParams:
     def period_end(self):
         return self._period_end
 
+    @property
+    def show_data_previews(self):
+        return self._show_data_previews
+
+    @property
+    def show_data_info(self):
+        return self._show_data_info
+
 
 class DataProviderPayload:
     def __init__(
@@ -51,16 +83,15 @@ class DataProviderPayload:
         self._params = params
         self._diff_data_sources = diff_data_sources
         self._combined_data_sources = combined_data_sources
-        
 
     @property
     def params(self):
         return self._params
-    
+
     @property
     def diff_data_sources(self):
         return self._diff_data_sources
-    
+
     @property
     def combined_data_sources(self):
         return self._combined_data_sources
@@ -69,6 +100,8 @@ class DataProviderPayload:
 """
 Type enforcement/documentation for get_orders method
 """
+
+
 class OrderHistoryPayload:
     asset_class: str
     asset_id: str

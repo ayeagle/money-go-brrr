@@ -1,23 +1,29 @@
 import asyncio
 import datetime
 import json
-from typing import List
+import sys
+from typing import List, Union
+from numpy import void
 
 import openmeteo_requests
 import pandas as pd
 import requests_cache
-from alpaca.data import StockQuotesRequest
+from alpaca.data import StockQuotesRequest, StockBarsRequest
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.timeframe import TimeFrame
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import QueryOrderStatus
 from alpaca.trading.requests import GetOrdersRequest
+from alpaca.data.models import QuoteSet
+from alpaca.common.types import RawData
 from retry_requests import retry
+from core_script.cli_formatters import emphasize, green
 
 from consts.consts import WeatherCoords
 from core_script.class_alpaca_account import AlpacaAccount
 from data.data_classes import (DataProviderParams, DataProviderPayload,
                                OrderHistoryPayload)
+from core_script.script_helpers import gen_preview_files
 
 """
 **********************************************************
@@ -38,20 +44,19 @@ Nested data is of the type PriceHistoryPayload
 """
 
 
-async def gen_stock_prices(
-    acc: AlpacaAccount,
-    target_symbols: List[str],
-    period_start: datetime,
-    period_end: datetime,
-):
+async def gen_recent_live_stock_prices(
+        acc: AlpacaAccount,
+        target_symbol: str,
+        period_start: datetime,
+        period_end: datetime) -> pd.DataFrame:
 
     hist_data_client = StockHistoricalDataClient(*acc.get_api_keys())
 
     params_payload = StockQuotesRequest(
-        symbol_or_symbols=target_symbols,
+        symbol_or_symbols=target_symbol,
         start=period_start,
         end=period_end,  # TODO something weird going on w/ this param
-        limit=1000,
+        limit=30,
         # timeframe=TimeFrame.Day,
         feed='sip',
         sort='asc',
@@ -59,27 +64,39 @@ async def gen_stock_prices(
 
     hist_price_dataframe = hist_data_client.get_stock_quotes(params_payload)
 
-    each_asset_df = {}
-    all_assets_df = pd.DataFrame()
+    formatted_df = format_nested_stock_df(hist_price_dataframe, target_symbol)
 
-    for asset in hist_price_dataframe.data:
-        asset_df = pd.DataFrame(
-            [{key: value for key, value in obj} for obj in hist_price_dataframe.data[asset]])
+    formatted_df = formatted_df.assign(market_price=(
+        formatted_df['_bid_price'] + formatted_df['_ask_price']) / 2)
 
-        formatted_df = format_raw_columns(asset_df)
+    return formatted_df
 
-        formatted_df = formatted_df.assign(market_price=(
-            formatted_df['_bid_price'] + formatted_df['_ask_price']) / 2)
 
-        all_assets_df = pd.concat([all_assets_df, formatted_df], axis=1)
-        each_asset_df[asset] = formatted_df
+async def gen_custom_period_stock_prices(
+        acc: AlpacaAccount,
+        target_symbol: str,
+        period_start: datetime,
+        period_end: datetime) -> pd.DataFrame:
 
-    final_data = {
-        'price_history_by_asset': each_asset_df,
-        'price_history_all': all_assets_df
-    }
+    hist_data_client = StockHistoricalDataClient(*acc.get_api_keys())
 
-    return final_data
+    params_payload = StockBarsRequest(
+        symbol_or_symbols=target_symbol,
+        start=period_start,
+        end=period_end,  # TODO something weird going on w/ this param
+        limit=5,
+        timeframe=TimeFrame.Day,
+        feed='sip',
+        sort='asc',
+    )
+
+    hist_price_dataframe = hist_data_client.get_stock_bars(params_payload)
+
+    formatted_df = format_nested_stock_df(hist_price_dataframe, target_symbol)
+
+    # print(formatted_df)
+
+    return formatted_df
 
 
 """
@@ -94,12 +111,11 @@ converted to dataframe
 
 
 async def gen_orders_data(
-    acc: AlpacaAccount,
-    target_symbols: List[str],
-    period_start: datetime,
-    period_end: datetime,
-    paper_trading: bool = True,
-):
+        acc: AlpacaAccount,
+        target_symbols: List[str],
+        period_start: datetime,
+        period_end: datetime,
+        paper_trading: bool = True) -> pd.DataFrame:
 
     order_data_client = TradingClient(*acc.get_api_keys(), paper=paper_trading)
 
@@ -127,8 +143,8 @@ async def gen_weather_data(
         latitude: float,
         longitude: float,
         period_start: datetime,
-        period_end: datetime,
-):
+        period_end: datetime) -> pd.DataFrame:
+
     cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
     openmeteo = openmeteo_requests.Client(session=retry_session)
@@ -200,9 +216,24 @@ async def gen_weather_data(
     return weather_df
 
 
-def format_raw_columns(
-        raw_data: pd.DataFrame
-) -> pd.DataFrame:
+"""
+**********************************************************
+Dataframe formatters
+**********************************************************
+"""
+
+
+def format_nested_stock_df(raw_data: QuoteSet | RawData, asset_key: str) -> pd.DataFrame:
+
+    df = pd.DataFrame(
+        [{key: value for key, value in obj} for obj in raw_data.data[asset_key]])
+
+    formatted_df = format_raw_columns(df)
+
+    return formatted_df
+
+
+def format_raw_columns(raw_data: pd.DataFrame) -> pd.DataFrame:
 
     for col in raw_data.columns:
         raw_data.rename(columns={col: '_' + col}, inplace=True)
@@ -231,11 +262,26 @@ async def gen_data(
     print(nyc_long)
     print(*vars(params))
 
-    stock_data = await gen_stock_prices(
-        acc=acc,
-        target_symbols=params.stock_tickers,
-        period_start=params.period_start,
-        period_end=params.period_end)
+    recent_stock_feed_data = {}
+    custom_period_stock_data = {}
+
+    for stonk in params.stock_tickers:
+        new_data = await gen_recent_live_stock_prices(
+            acc=acc,
+            target_symbol=stonk,
+            period_start=params.period_start,
+            period_end=params.period_end)
+        live_data_key = stonk + "_live"
+        recent_stock_feed_data[live_data_key] = new_data
+
+        new_custom_data = await gen_custom_period_stock_prices(
+            acc=acc,
+            target_symbol=stonk,
+            period_start=params.period_start,
+            period_end=params.period_end)
+        custom_data_key = stonk + "_custom"
+        custom_period_stock_data[custom_data_key] = new_custom_data
+
     orders_data = await gen_orders_data(
         acc=acc,
         target_symbols=params.stock_tickers,
@@ -250,12 +296,13 @@ async def gen_data(
     )
 
     diff_data_sources = {
-        'stock_data': stock_data,
+        'recent_live_stock_price_data': recent_stock_feed_data,
+        'custom_period_stock_price_data': custom_period_stock_data,
         'orders_data': orders_data,
         'weather_data': weather_data
     }
 
-    print(diff_data_sources)
+    # print(diff_data_sources)
     # TODO actually set this up lol
     combined_data_sources = diff_data_sources['weather_data']
 
@@ -264,5 +311,9 @@ async def gen_data(
         diff_data_sources=diff_data_sources,
         combined_data_sources=combined_data_sources
     )
+
+    gen_preview_files(
+        params=params,
+        data=final_data_payload)
 
     return final_data_payload

@@ -1,9 +1,9 @@
 import datetime as dt
 from datetime import date, datetime, timedelta
 from typing import List, Optional, Union
-from alpaca.data.timeframe import TimeFrame
 
 import pandas as pd
+from alpaca.data.timeframe import TimeFrame
 
 
 class DataProviderParams:

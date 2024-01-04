@@ -1,10 +1,11 @@
 import datetime as dt
 from enum import Enum
 
+from alpaca.data.timeframe import TimeFrame
+
 import consts.cli_messages as mess
 from core_script.cli_formatters import green, red, yellow
 from data.data_classes import DataProviderParams
-from alpaca.data.timeframe import TimeFrame
 
 
 class WeatherCoords(Enum):

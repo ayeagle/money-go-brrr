@@ -63,7 +63,7 @@ def print_params(params: DataProviderParams) -> void:
     params_dict = vars(params)
     for key, value in params_dict.items():
         key = key + ' :'
-        print(f"{key:25}{green(value)}")
+        print(f"{key:35}{green(value)}")
 
 
 def confirm_edit_params(params) -> bool:
@@ -108,6 +108,7 @@ Data preview and download functions
 
 
 def gen_preview_files(
+        data_params: DataProviderParams,
         data: Union[DataProviderPayload, dict],
         parent: str = 'DataProviderPayload',
         should_download: bool = False,
@@ -115,27 +116,52 @@ def gen_preview_files(
 
     if isinstance(data, DataProviderPayload):
         if (should_download):
-            exec_df_download(data.combined_data_sources,
-                             'combine_data_sources', ts)
-        gen_preview_files(data.diff_data_sources,
-                          'diff_data_sources', should_download, ts)
+            exec_df_download(
+                data.combined_data_sources,
+                'combine_data_sources',
+                ts)
+        gen_preview_files(
+            data_params,
+            data.diff_data_sources,
+            'diff_data_sources',
+            should_download,
+            ts)
     else:
         for key in data.keys():
             val = data[key]
             if isinstance(val, pd.DataFrame):
-                preview_data(val, parent, key)
+                preview_data(
+                    data_params,
+                    val,
+                    parent,
+                    key)
                 if (should_download):
-                    exec_df_download(val, key, ts)
+                    exec_df_download(
+                        val,
+                        key,
+                        ts)
             elif isinstance(val, dict):
-                gen_preview_files(val, key, should_download, ts)
+                gen_preview_files(
+                    data_params,
+                    val,
+                    key,
+                    should_download,
+                    ts)
 
 
-def preview_data(data: pd.DataFrame, parent: str, key: str) -> void:
-    print(emphasize(f"\nFolder '{parent}' \nKey '{key}':"))
-    print(green("DataFrame preview"))
-    print(data.head())
-    print(green("DataFrame info"))
-    data.info()
+def preview_data(
+        data_params: DataProviderParams,
+        data: pd.DataFrame,
+        parent: str,
+        key: str) -> void:
+    if (data_params.show_data_previews or data_params.show_data_info):
+        print(emphasize(f"\nFolder '{parent}' \nKey '{key}':"))
+    if (data_params.show_data_previews):
+        print(green("DataFrame preview"))
+        print(data.head())
+    if (data_params.show_data_info):
+        print(green("DataFrame info"))
+        data.info()
 
 
 def exec_df_download(

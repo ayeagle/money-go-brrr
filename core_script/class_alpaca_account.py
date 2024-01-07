@@ -17,7 +17,8 @@ class AlpacaAccount:
                 self.keys = (config('API_KEY_ID'), config('API_SECRET_KEY'))
                 self._paper_trading = False
             else:
-                self.keys = (config('PAPER_API_KEY_ID'), config('PAPER_API_SECRET_KEY'))
+                self.keys = (config('PAPER_API_KEY_ID'),
+                             config('PAPER_API_SECRET_KEY'))
                 self._paper_trading = True
         except:
             print(mess.no_api_keys_message)
@@ -163,19 +164,19 @@ class AlpacaAccount:
         return self.keys
 
     def get_SAFE_cash_balance(self):
-        return self.account.non_marginable_buying_power
+        return float(self._account.non_marginable_buying_power)
 
-    def can_trade(self):
-        if not self.account.account_blocked:
+    def account_is_able_to_trade(self):
+        if not self._account.account_blocked:
             print("Cannot trade due to account being blocked")
             return False
-        if self.account.status != "ACTIVE":
+        if self._account.status != "ACTIVE":
             print("Cannot trade due to account being inactive")
             return False
-        if not self.account.trade_suspended_by_user:
+        if not self._account.trade_suspended_by_user:
             print("Cannot trade due to account being suspeneded by user")
             return False
-        if not self.account.trading_blocked:
+        if not self._account.trading_blocked:
             print("Cannot trade due to trading being blocked on account")
             return False
         print("Can trade today")

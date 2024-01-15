@@ -18,10 +18,12 @@ Create new venv for script development
 $ ```python -m venv money_venv```
 
 ```shell
-source money_venv/bin/activate
+source money_venv/bin/activate```
 
 Install dependencies for venv
-$ ```pip install -r requirements.txt```
+
+```bash
+$ pip install -r requirements.txt```
 
 Create working branch
 $ ```git branch main_wip```

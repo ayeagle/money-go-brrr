@@ -14,12 +14,12 @@ navigate to repo
 
 may need to use "python3" for following commands depending on path setup
 
-```python -m venv money_venv```
+$ ```python -m venv money_venv```
 
-```source money_venv/bin/activate```
+$ ```source money_venv/bin/activate```
 
 
-```pip install -r requirements.txt```
+$ ```pip install -r requirements.txt```
 
 
 

@@ -24,7 +24,7 @@ async def gen_last_stock_price(
     params_payload = StockQuotesRequest(
         symbol_or_symbols=stonk,
         limit=10,
-        start=dt.date.today() - dt.timedelta(days=1),
+        start=dt.date.today() - dt.timedelta(days=5),
         end=dt.date.today(),
         feed='sip',
         sort='desc',

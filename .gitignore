@@ -20,6 +20,7 @@
 # py compiled
 *.pyc
 __pycache__/
+.cache.sqlite
 
 # virtual env
 money_venv/

@@ -17,9 +17,7 @@ may need to use "python3" instead of "python" for following commands depending o
 Create new venv for script development
 $ ```python -m venv money_venv```
 
-$ ```shell
-source money_venv/bin/activate
-```
+$ ```shell source money_venv/bin/activate```
 
 Install dependencies for venv
 $ ```shell

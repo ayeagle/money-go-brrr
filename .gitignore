@@ -2,7 +2,6 @@
 
 # # dependencies
 
-
 # testing
 /coverage
 
@@ -14,6 +13,13 @@
 # misc
 
 # debug
+
+# ide
+.vscode/
+
+# py compiled
+*.pyc
+__pycache__/
 
 # virtual env
 money_venv/
@@ -30,6 +36,11 @@ downloaded_data/
 .env.test.local
 .env.production.local
 .gitgo_repo_url
+.env.*
+
+# logs
+*.log
+*.tmp
 
 # Local Netlify folder
 # .netlify
@@ -39,4 +50,3 @@ downloaded_data/
 *.key
 *.crt
 *.csr
-

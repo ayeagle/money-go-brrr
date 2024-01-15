@@ -52,17 +52,15 @@ Run to get started
 python script_controller.py help
 ```
 
-<details>
-  <summary>Available script run modes:</summary>
-  <p>
-    <code style="color: green">test</code> [default] => runs script in paper trading, skipping certain account checks<br>
-    <code style="color: green">full_test</code> => runs script in paper trading, including account checks<br>
-    <code style="color: green">prod</code> => runs script with real trading account<br>
-    <code style="color: green">prod_dangerous</code> => runs script with real money and trading authorization<br>
-    <code style="color: green">download</code> => runs script with paper creds and initiates a download of the data<br>
-    <code style="color: green">help</code> => shows the help command<br>
-  </p>
-</details>
+<summary>Available script run modes:</summary>
+<p>
+<code style="color: green">test</code> [default] => runs script in paper trading, skipping certain account checks<br>
+<code style="color: green">full_test</code> => runs script in paper trading, including account checks<br>
+<code style="color: green">prod</code> => runs script with real trading account<br>
+<code style="color: green">prod_dangerous</code> => runs script with real money and trading authorization<br>
+<code style="color: green">download</code> => runs script with paper creds and initiates a download of the data<br>
+<code style="color: green">help</code> => shows the help command<br>
+</p>
 
 To end virtual env session
 

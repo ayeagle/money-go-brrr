@@ -18,7 +18,8 @@ Create new venv for script development
 $ ```python -m venv money_venv```
 
 ```shell
-source money_venv/bin/activate```
+source money_venv/bin/activate
+```
 
 Install dependencies for venv
 

@@ -12,24 +12,27 @@ clone the repo
 
 navigate to repo
 
-may need to use "python3" for following commands depending on path setup
+may need to use "python3" instead of "python" for following commands depending on setup
 
+Create new venv for script development
 $ ```python -m venv money_venv```
 
+Activate venv
 $ ```source money_venv/bin/activate```
 
-
+Install dependencies for venv
 $ ```pip install -r requirements.txt```
 
+Create working branch
+$ ```git branch main_wip```
+$ ```git checkout main_wip```
 
+Run to get started
+$```python script_controller.py help```
 
 
 To end virtual env session
-```deactivate```
+$```deactivate```
 
-
-
-
-For list of run options: ```$ python3 script_controller.py help```
 
 Hehe

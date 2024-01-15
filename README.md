@@ -20,7 +20,8 @@ $ ```python -m venv money_venv```
 $ ```shell source money_venv/bin/activate```
 
 Install dependencies for venv
-$ ```shell
+$ 
+```shell
 pip install -r requirements.txt
 ```
 

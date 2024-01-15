@@ -17,25 +17,33 @@ may need to use "python3" instead of "python" for following commands depending o
 Create new venv for script development
 $ ```python -m venv money_venv```
 
-```shell
+$```shell
 source money_venv/bin/activate
 ```
 
 Install dependencies for venv
-
-```bash
-$ pip install -r requirements.txt```
+$```shell
+pip install -r requirements.txt
+```
 
 Create working branch
-$ ```git branch main_wip```
-$ ```git checkout main_wip```
+$ ```shell
+git branch main_wip
+```
+$```shell
+git checkout main_wip
+```
 
 Run to get started
-$```python script_controller.py help```
+$```shell
+python script_controller.py help
+```
 
 
 To end virtual env session
-$```deactivate```
+$```shell
+deactivate
+```
 
 
 Hehe

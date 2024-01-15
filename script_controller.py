@@ -9,6 +9,7 @@ from core_script.script_helpers import (convert_cli_args, gen_preview_files,
                                         is_trading_day)
 from data.data_classes import DataProviderParams
 from data.data_provider import gen_data
+from core_script.trading import exec_trade_decision
 from trading_model.core_model import gen_run_core_model
 
 """
@@ -71,7 +72,9 @@ async def main() -> int:
             'Data successfully downloaded. You can access it in the downloaded_data folder.'))
         return 0
 
-    decision = await gen_run_core_model(data_params)
+    trade_decision_volume = await gen_run_core_model(data_params)
+
+    await exec_trade_decision(acc, trade_decision_volume)
 
     # run/create new model
 

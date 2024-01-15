@@ -9,7 +9,7 @@ from decouple import config
 from numpy import void
 
 import consts.cli_messages as mess
-from consts.consts import RunTypeParam, commands, data_param_presets
+from consts.consts import ParamCanTrade, ParamTradeCredentials, RunTypeParam, commands, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
 from core_script.cli_formatters import (blue_back, bold, emphasize, green, red,
                                         yellow)
@@ -173,7 +173,7 @@ def exec_df_download(
     folder_path = f'downloaded_data/{timestamp[0]}'
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    
+
     data.to_csv(
         f'downloaded_data/{timestamp[0]}/{file_name}_{timestamp[0]}_{timestamp[1]}.csv', index=False)
 
@@ -226,10 +226,23 @@ def print_run_mode_summary(items: list) -> void:
         if (key == 'help'):
             continue
         command_data = commands[key]
+
+        trade_creds = command_data['trade_credentials']
+        can_trade = command_data['can_trade']
+
+        printable_trade_creds = (
+            red(trade_creds.value)
+            if trade_creds == ParamTradeCredentials.REAL_MONEY_TRADING
+            else green(trade_creds.value))
+        printable_can_trade = (
+            red(can_trade.value)
+            if can_trade == ParamCanTrade.CAN_TRADE_REAL_MONEY
+            else green(can_trade.value))
+
         print('Run Mode:    ' + emphasize(command_data['run_mode']))
         print('Script flag:     ' + "'" +
               command_data['run_type_param'].value + "'")
-        print('Credentials:     ' + command_data['trade_credentials'])
-        print('Can Trade:       ' + command_data['can_trade'])
+        print('Credentials:     ' + printable_trade_creds)
+        print('Can Trade:       ' + printable_can_trade)
         print('Description:     ' + command_data['run_mode_descr'])
         print(mess.hl)

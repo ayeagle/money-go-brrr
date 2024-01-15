@@ -15,7 +15,7 @@ from alpaca.trading.requests import GetOrdersRequest
 from numpy import void
 from retry_requests import retry
 
-from consts.consts import WeatherCoords
+from consts.consts import RunTypeParam, WeatherCoords
 from core_script.class_alpaca_account import AlpacaAccount
 from core_script.script_helpers import gen_preview_files
 from data.data_classes import (DataProviderParams, DataProviderPayload,
@@ -309,8 +309,9 @@ async def gen_data(
         combined_data_sources=combined_data_sources
     )
 
-    gen_preview_files(
-        data_params=params,
-        data=final_data_payload)
+    if (acc.run_type_param != RunTypeParam.DOWNLOAD):
+        gen_preview_files(
+            data_params=params,
+            data=final_data_payload)
 
     return final_data_payload

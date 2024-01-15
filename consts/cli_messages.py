@@ -33,3 +33,14 @@ Available script run modes:
 '''
 
 hl = '\n*******************************************************************\n'
+
+
+env_created_message = bold(red('''
+\n*******************************************************************
+***                                                             ***
+***             .env file created but still needs               ***
+***              actual credentials in order for                ***
+***              the script to use alpaca apis.                 ***
+***                                                             ***
+*******************************************************************
+'''))

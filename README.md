@@ -30,12 +30,15 @@ pip install -r requirements.txt
 Create working branch
 ```shell
 git branch main_wip
-
 ```
 
 ```shell
 git checkout main_wip
+```
 
+Create .env for api keys
+```shell
+python script_setup.py
 ```
 
 Run to get started

@@ -52,7 +52,7 @@ Run to get started
 python script_controller.py help
 ```
 
-<summary>Available script run modes:</summary>
+<strong>Available script run modes:</strong>
 <p>
 <code style="color: green">test</code> [default] => runs script in paper trading, skipping certain account checks<br>
 <code style="color: green">full_test</code> => runs script in paper trading, including account checks<br>

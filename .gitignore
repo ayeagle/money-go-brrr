@@ -18,6 +18,8 @@
 # virtual env
 money_venv/
 
+# exclude downloaded data
+downloaded_data/
 
 # configs
 

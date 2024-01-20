@@ -35,10 +35,10 @@ Account checks that fail when paper trading
 """
 
 
-async def main() -> int:
+async def main(event_arg) -> int:
 
     # TODO add richer test params
-    run_type_param = convert_cli_args()
+    run_type_param = convert_cli_args(event_arg)
 
     acc = AlpacaAccount(run_type_param)
 
@@ -91,4 +91,5 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    event_arg=None
+    asyncio.run(main(event_arg))

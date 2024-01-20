@@ -185,12 +185,16 @@ CLI runtime parameter parsing functions
 '''
 
 
-def convert_cli_args() -> list:
-    args = sys.argv[1:]
-    if args and len(args) > 0:
-        primary_arg = args[0].lower()
+def convert_cli_args(arg=None) -> list:
+    if (arg == None):
+        args = sys.argv[1:]
+        if args and len(args) > 0:
+            primary_arg = args[0].lower()
+        else:
+            primary_arg = ''
     else:
-        primary_arg = ''
+        primary_arg = arg
+        
     run_param = handle_special_commands(primary_arg)
     return run_param
 

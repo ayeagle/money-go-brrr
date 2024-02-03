@@ -13,7 +13,6 @@ from alpaca.trading.enums import OrderSide, OrderType, TimeInForce, OrderClass
 class WeatherCoords(Enum):
     NY_WALL_STREET = (40.70618619744728, -74.00914109658291)
 
-
 class RunTypeParam(Enum):
     TEST = 'test'
     FULL_TEST = 'full_test'
@@ -33,6 +32,14 @@ class ParamCanTrade(Enum):
     CAN_TRADE_PAPER = 'can_trade_paper'
     CAN_TRADE_REAL_MONEY = 'can_trade_real_money'
     CAN_NOT_TRADE_ANY = 'can_not_trade_any'
+
+
+class TradeSize(Enum):
+    XSMALL = .05
+    SMALL = .1
+    MEDIUM = .25
+    LARGE = .5
+    XLARGE = 1
 
 
 '''

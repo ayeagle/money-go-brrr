@@ -9,6 +9,7 @@ from data.data_classes import DataProviderParams
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, OrderType, TimeInForce, OrderClass
 
+KEYS_ENV_LOCATION = '.env'
 
 class WeatherCoords(Enum):
     NY_WALL_STREET = (40.70618619744728, -74.00914109658291)

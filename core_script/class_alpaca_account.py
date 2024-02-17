@@ -1,11 +1,11 @@
 import sys
 
 from alpaca.trading.client import TradingClient
-from decouple import config
+from decouple import config, UndefinedValueError
 
 import consts.cli_messages as mess
 from consts.consts import RunTypeParam
-from core_script.cli_formatters import bold, red
+from core_script.cli_formatters import bold, formatWarningMessage, red
 
 
 class AlpacaAccount:
@@ -20,8 +20,12 @@ class AlpacaAccount:
                 self.keys = (config('PAPER_API_KEY_ID'),
                              config('PAPER_API_SECRET_KEY'))
                 self._paper_trading = True
-        except:
-            print(mess.no_api_keys_message)
+        except UndefinedValueError as e:
+            missing_variable = str(e).split()[0]  # Extract the missing variable from the error message
+            thing=f"""The required param ${missing_variable} 
+                is missing in the .env file.\n"""
+
+            formatWarningMessage(thing  + "\n" + mess.no_api_keys_message)
             sys.exit(0)
 
         self.client = TradingClient(*self.keys)

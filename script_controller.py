@@ -1,12 +1,17 @@
 import asyncio
 from datetime import datetime
 
+
+# maybe remove
+import sys
+
+
 from consts.consts import RunTypeParam, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
 from core_script.cli_formatters import green
 from core_script.script_helpers import (convert_cli_args, gen_preview_files,
                                         gen_prompt_confirm_data_params,
-                                        is_trading_day)
+                                        is_trading_day, check_trade_readiness_param)
 from data.data_classes import DataProviderParams
 from data.data_provider import gen_data
 from core_script.trading import exec_trade_decision
@@ -36,6 +41,8 @@ Account checks that fail when paper trading
 
 
 async def main(event_arg) -> int:
+
+    check_trade_readiness_param()
 
     # TODO add richer test params
     run_type_param = convert_cli_args(event_arg)
@@ -91,5 +98,5 @@ async def main(event_arg) -> int:
 
 
 if __name__ == "__main__":
-    event_arg=None
+    event_arg = None
     asyncio.run(main(event_arg))

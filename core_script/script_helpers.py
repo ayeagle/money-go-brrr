@@ -5,23 +5,34 @@ from typing import Union
 
 import pandas as pd
 import pandas_market_calendars as mcal
-from decouple import config
+from decouple import config, UndefinedValueError
 from numpy import void
 
 import consts.cli_messages as mess
 from consts.consts import ParamCanTrade, ParamTradeCredentials, RunTypeParam, commands, data_param_presets
 from core_script.class_alpaca_account import AlpacaAccount
-from core_script.cli_formatters import (blue_back, bold, emphasize, green, red,
+from core_script.cli_formatters import (blue_back, bold, emphasize, formatWarningMessage, green, red,
                                         yellow)
 from data.data_classes import DataProviderParams, DataProviderPayload
 
-ready_to_trade = config('READY_TO_TRADE') == 'True'
 
 '''
 **********************************************************
 General functions
 **********************************************************
 '''
+
+
+def check_trade_readiness_param() -> void:
+    try:
+        config('READY_TO_TRADE')
+    except UndefinedValueError as e:
+        missing_variable = str(e).split()[0]
+        thing = f"""The required param ${missing_variable} 
+                is missing in the .env file.
+                This should likley be set to FALSE.\n"""
+        formatWarningMessage(thing)
+        sys.exit(0)
 
 
 def is_trading_day() -> bool:
@@ -194,7 +205,7 @@ def convert_cli_args(arg=None) -> list:
             primary_arg = ''
     else:
         primary_arg = arg
-        
+
     run_param = handle_special_commands(primary_arg)
     return run_param
 
@@ -208,10 +219,11 @@ def handle_special_commands(arg: str) -> RunTypeParam:
         command_data = commands.get('no_arg_found')
         print_run_mode_summary(['no_arg_found'])
 
-    if (command_data['run_type_param'] == RunTypeParam.PROD_DANGEROUS and not ready_to_trade):
-        print(mess.not_ready_warning_message)
+    if (command_data['run_type_param'] == RunTypeParam.PROD_DANGEROUS and config('READY_TO_TRADE') != "TRUE"
+            ):
+        formatWarningMessage(mess.not_ready_warning_message)
         print_run_mode_summary(commands.keys())
-        print(mess.not_ready_warning_message)
+        formatWarningMessage(mess.not_ready_warning_message)
         sys.exit()
     elif (command_data['run_type_param'] == RunTypeParam.TEST and arg == 'help'):
         print_run_mode_summary(commands.keys())

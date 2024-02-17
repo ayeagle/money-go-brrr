@@ -1,19 +1,14 @@
-from core_script.cli_formatters import bold, green, red
+from core_script.cli_formatters import (bold, green, red)
 
-no_api_keys_message = bold(red('''
-*******************************************************************
-***                You do not have any API keys.                ***
-***     Please procure keys and store them in .env root file    ***
-*******************************************************************
-'''))
+no_api_keys_message = '''
+Please procure keys and store them in .env root file   
+'''
 
-not_ready_warning_message = bold(red('''
-\n*******************************************************************
-***                          WARNING                            ***
-***              The script is NOT ready to trade               ***
-***        Please do not use 'prod_dangerous' param yet         ***
-*******************************************************************
-'''))
+not_ready_warning_message = '''
+WARNING   
+  The script is NOT ready to trade             
+          Please do not use 'prod_dangerous' param yet     
+'''
 
 help_message = f'''
 {green('COMMANDS')}
@@ -35,12 +30,8 @@ Available script run modes:
 hl = '\n*******************************************************************\n'
 
 
-env_created_message = bold(red('''
-\n*******************************************************************
-***                                                             ***
-***             .env file created but still needs               ***
-***              actual credentials in order for                ***
-***              the script to use alpaca apis.                 ***
-***                                                             ***
-*******************************************************************
-'''))
+env_created_message = '''
+.env file created but still needs
+actual credentials in order for     
+the script to use alpaca apis. 
+'''

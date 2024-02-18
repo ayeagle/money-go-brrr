@@ -1,5 +1,7 @@
 import math
 
+from numpy import void
+
 
 def red(text: str) -> str:
     return f'\033[91m{text}\033[0m'
@@ -46,7 +48,7 @@ def emphasize(text: str) -> str:
     # print("\x1b[47mWhite Background\x1b[0m")
 
 
-def formatWarningMessage(message: str = "") -> str:
+def formatWarningMessage(message: str = "") -> void:
 
     top_bottom_width = 70
     margin_width = 3
@@ -54,25 +56,22 @@ def formatWarningMessage(message: str = "") -> str:
     margin = '*' * margin_width
     new_line = "\n"
 
+    lines = message.splitlines() + [""]
+    filler = new_line + margin + \
+        ((top_bottom_width-(margin_width*2)) * " ") + margin
     printable = top_bottom
-
-    lines = []
-    lines += (message.splitlines())
-    lines += ("")
-    filler = new_line + margin + ((top_bottom_width-(margin_width*2))
-                                  * " ") + margin
-
     printable += filler
+
     for line in lines:
-        if(line != ""):
+        if (line != ""):
             line = line.strip()
             length = len(line)
             spacer_num = (top_bottom_width-length-(margin_width*2))
             spacer = math.floor(spacer_num/2) * " "
             second_spacer = spacer + (" " if spacer_num % 2 == 1 else "")
             printable += new_line + margin + spacer + line + second_spacer + margin
-    printable +=  filler
-
+            
+    printable += filler
     printable += new_line + top_bottom
+
     print(bold(red(printable)))
-    return ""

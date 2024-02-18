@@ -50,8 +50,7 @@ async def normalize_order_request_by_qty(
 
     available_balance = acc.get_SAFE_cash_balance()
 
-    # TODO also need to get account position in stonk
-    current_position = 0
+    current_position_value = gen_account_position_market_value(acc, order.symbol)
 
     # check if can buy that amount w/o margin
     if (order.side == OrderSide.BUY):
@@ -59,9 +58,9 @@ async def normalize_order_request_by_qty(
             print("Adjusting buy order to not exceed available funds")
             order.qty = (available_balance / last_price) * .9
     else:
-        if (order.qty * last_price > current_position):
+        if (order.qty * last_price > current_position_value):
             print("Adjusting sell order to not exceed current positon")
-            order.qty = (current_position / last_price) * .9
+            order.qty = (current_position_value / last_price) * .9
 
     return order
 
@@ -82,16 +81,32 @@ async def normalize_order_request_by_asset(
     return order
 
 
+async def gen_account_position_qty(
+        acc: AlpacaAccount,
+        target_symbol: str,
+        paper_trading: bool = True) -> float:
+
+    order_data_client = TradingClient(*acc.get_api_keys(), paper=paper_trading)
+    asset = order_data_client.get_open_position(target_symbol)
+    return asset.qty
+
+
+async def gen_account_position_market_value(
+        acc: AlpacaAccount,
+        target_symbol: str,
+        paper_trading: bool = True) -> float:
+
+    order_data_client = TradingClient(*acc.get_api_keys(), paper=paper_trading)
+    asset = order_data_client.get_open_position(target_symbol)
+    return asset.market_value
+
+
 async def exec_trade_decision(
         acc: AlpacaAccount,
         volume: float) -> int:
 
-    keys = acc.get_api_keys()
-
     trading_client = TradingClient(
-        api_key=keys[0],
-        secret_key=keys[1],
-        paper=acc.paper_trading)
+        *acc.get_api_keys(), paper=acc.paper_trading)
 
     order: MarketOrderRequest = trade_param_presets['default']
 

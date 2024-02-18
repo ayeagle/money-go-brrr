@@ -6,8 +6,8 @@ Please procure keys and store them in .env root file
 
 not_ready_warning_message = '''
 WARNING   
-  The script is NOT ready to trade             
-          Please do not use 'prod_dangerous' param yet     
+The script is NOT ready to trade             
+Please do not use 'prod_dangerous' param yet     
 '''
 
 help_message = f'''

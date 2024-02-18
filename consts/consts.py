@@ -131,8 +131,8 @@ data_param_presets: dict[str, DataProviderParams] = {
         get_weather_data=True,
         period_start=dt.date.today() - dt.timedelta(days=365),
         period_end=dt.date.today() - dt.timedelta(days=1),
-        show_data_previews=True,
-        show_data_info=True,
+        show_data_previews=False, #should undo
+        show_data_info=False, #should undo
     ),
     'spy_only': DataProviderParams(
         stock_tickers=["SPY"],

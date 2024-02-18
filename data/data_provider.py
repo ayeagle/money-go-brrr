@@ -1,4 +1,5 @@
 import datetime
+import sys
 from typing import List
 
 import openmeteo_requests
@@ -12,6 +13,8 @@ from alpaca.data.timeframe import TimeFrame
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import QueryOrderStatus
 from alpaca.trading.requests import GetOrdersRequest
+from alpaca.trading.requests import GetAssetsRequest
+
 from numpy import void
 from retry_requests import retry
 
@@ -222,21 +225,18 @@ Dataframe formatters
 """
 
 
-def format_nested_stock_df(raw_data: QuoteSet | RawData, asset_key: str) -> pd.DataFrame:
-
+def format_nested_stock_df(
+        raw_data: QuoteSet | RawData,
+        asset_key: str) -> pd.DataFrame:
     df = pd.DataFrame(
         [{key: value for key, value in obj} for obj in raw_data.data[asset_key]])
-
     formatted_df = format_raw_columns(df)
-
     return formatted_df
 
 
 def format_raw_columns(raw_data: pd.DataFrame) -> pd.DataFrame:
-
     for col in raw_data.columns:
         raw_data.rename(columns={col: '_' + col}, inplace=True)
-
     return raw_data
 
 
